@@ -187,3 +187,71 @@ body {
     bottom: 110px;
     width: 30vw;
   }
+
+  /* Centered Camera Container */
+.camera-container {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 80vw;
+  max-width: 600px;
+  height: auto;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 2px solid rgb(251, 251, 251);
+  border-radius: 2px;
+  box-shadow: 0 0 15px rgba(149, 149, 149, 0.5);
+  z-index: 9999; /* To ensure it stays on top of other elements */
+}
+
+#video {
+  width: 100%;
+  height: auto;
+  background-color: black;
+  border: 2px solid rgb(255, 255, 255);
+  z-index: 10;  /* Ensure the video stays above other elements */
+}
+
+
+/* Camera Control Buttons */
+.switchcam-button, .capture-button {
+  font-family: monospace;
+  color: rgb(34, 158, 0);
+  border-color: rgb(48, 221, 0);
+  border-style: solid;
+  height: 40px;
+  width: 180px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 18px;
+  margin-top: 10px;
+  transition: 0.5;
+}
+
+.switchcam-button:hover, .capture-button:hover {
+  background-color: rgb(48, 221, 0);
+  color: white;
+}
+
+/* Close button style for the camera modal */
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  z-index: 10000; /* Make sure it stays above everything */
+}
+
+.close-button:hover {
+  color: rgb(238, 255, 0);
+}

@@ -6,12 +6,18 @@
   <meta property="og:title" content="satellite network image exchange">
 
   <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
   <script src="about.js"></script>
+  <script src="app.js" defer></script>
+    <!-- Include Axios CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 </head>
 
 <body>
     <p class="exchange">
       _satellite_network_image_exchange_卫星网络影像交换_
+    </p>
 
     <h3 class="lang">
       <a href="index.html">ENG</a> / <a href="upload_page_ch.html">中文</a>
@@ -19,9 +25,7 @@
 
     <p class="title">
       send your image to space
-
     </p>
-    <br>
 
     <p class="text">
       If you could send one image you capture to space for everyone to see, what would you upload? 
@@ -29,13 +33,27 @@
 
     <img src="xu-studio-img_SCA test.png">
 
-    <!-- <p class="text">IMG_5135.JPG</p> -->
-    <!-- <label for="name" class="text">为此照片你愿留下什么祝福？</label> -->
-    <!-- <input type="text" placeholder="你的祝福" class="your-wish"> -->
+    <!-- Start Camera Button -->
+    <button id="startCameraButton" class="startcam-button">Start Camera</button>
+
+    <!-- Local Upload Button -->
+    <button id="uploadLocalButton" class="upload-button">Local Upload</button>
+    <input type="file" id="localImageInput" style="display:none;" />
+
+<!-- Modal/Container for Camera and Buttons -->
+<div id="cameraContainer" class="camera-container" style="display:none;">
+  <button id="closeCamera" class="close-button">X</button>
+  <video id="video" autoplay playsinline></video>
+ 
+  <canvas id="canvas" style="display:none;"></canvas>
+
+  <!-- Camera Control Buttons inside the container -->
+  <button id="switchButton" class="switchcam-button">Switch Camera</button>
+  <button id="captureButton" class="capture-button">Take Photo</button>
+</div>
 
 
-    <button class="startcam-button">Start Camera</button>
-    <button class="upload-button">Take Photo</button>
+    <p id="locationData" class="location-data"></p>
 
     <button id="about-button" onclick="toggleIframe()">About</button>
     <iframe id="popupFrame" src="about.html"></iframe>
@@ -43,16 +61,7 @@
     <p class="poetic-text">
       This is a commissioned work for the Star Chain of Arts Project,
       <br>
-      at the Xu Bing Space Art Residency Program.  
+      at the Xu Bing Space Art Residency Program. 
     </p>
-      
-    <!-- <p class="exchange">
-      <br>
-      上传_下载_上传_下载_上传_下载_上传_下载_上传_下载_上传_下载_上传_下载_上传_下载_
-    </p> -->
-
-
-
 </body>
-
 </html>

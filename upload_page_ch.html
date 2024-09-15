@@ -1,18 +1,22 @@
 <!DOCTYPE html>
 <head>
   <meta charset="utf-8" />
-  <title>satellite network image exchange</title>
-  <meta name="description" content="Star Chain of Arts Project">
-  <meta property="og:title" content="satellite network image exchange">
+  <title>卫星网络影像交换</title>
+  <meta name="description" content="星链艺术计划">
+  <meta property="og:title" content="卫星网络影像交换">
 
   <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
   <script src="about.js"></script>
+  <script src="app.js" defer></script>
+    <!-- Include Axios CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 </head>
 
 <body>
     <p class="exchange">
       _satellite_network_image_exchange_卫星网络影像交换_
-
     </p>
 
     <h3 class="lang">
@@ -20,34 +24,41 @@
     </h3>
 
     <p class="title">
-      send your image to space
+      发送你的图片到太空
     </p>
-    <br>
 
     <p class="text">
       如果你可以上传一张图片到太空让所有人都看得到，你会上传什么？
     </p>
 
-
     <img src="xu-studio-img_SCA test.png">
 
-    <button class="startcam-button">打开相机</button>
-    <button class="upload-button">拍照</button>
+    <!-- 打开相机按钮 -->
+    <button id="startCameraButton" class="startcam-button">打开相机</button>
+
+    <!-- 本地上传按钮 -->
+    <button id="uploadLocalButton" class="upload-button">本地上传</button>
+    <input type="file" id="localImageInput" style="display:none;" />
+
+    <!-- 相机和按钮的模态容器 -->
+    <div id="cameraContainer" class="camera-container" style="display:none;">
+      <button id="closeCamera" class="close-button">X</button>
+      <video id="video" autoplay></video>
+      <canvas id="canvas" style="display:none;"></canvas>
+
+      <!-- 容器内的相机控制按钮 -->
+      <button id="switchButton" class="switchcam-button">切换相机</button>
+      <button id="captureButton" class="capture-button">拍照</button>
+    </div>
+
+    <p id="locationData" class="location-data"></p>
+
     <button id="about-button" onclick="toggleIframe()">关于</button>
     <iframe id="popupFrame" src="about.html"></iframe>
-
 
     <p class="poetic-text">
       本项目为《徐冰艺术卫星创作驻留项目》“艺术星链计划”委任
     </p>
 
-      
-    <p class="exchange">
-      <!-- 上传_下载_上传_下载_上传_下载_上传_下载_上传_下载_上传_下载_上传_下载_上传_下载_ -->
-    </p>
-
-
-
 </body>
-
 </html>
