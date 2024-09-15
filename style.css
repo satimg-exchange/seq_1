@@ -181,7 +181,7 @@ body {
   }
 
   img {
-    position: relative;
+    position: absolute;
     left: 50%;
     transform: translateX(-50%);
     bottom: 50px;
