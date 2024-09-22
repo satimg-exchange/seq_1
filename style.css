@@ -4,21 +4,21 @@ body {
 
   .exchange {
       font-family: monospace;
-      font-size: 12px;
+      font-size: 10px;
       font-style: italic;
       color: white;
-      text-align: center;
+      /* text-align: center; */
     }
 
   .lang {
       position: absolute;
-      top: 130px;
-      right: 160px;
+      text-align: right;
+      top: 5%;
+      right: 1.5vw;
       font-family: monospace;
-      font-size: 20px;
+      font-size: 1.5vh;
       font-style: italic;
       color: white;
-      margin-top: 80px;
       margin-bottom: 100px;
     }
 
@@ -36,10 +36,12 @@ body {
 
   .title {
     display: flex;
-    justify-content: center;
+    position: absolute;
+    /* justify-content: center; */
+    left: 1vw;
     align-items: center;
-    top: 5%;
-    font-size: 50px;
+    top: 12vh;
+    font-size: 5.5vw;
     text-align: center;
     color: white;
     font-family: monospace;
@@ -52,13 +54,15 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    /* top: 80%; */
+    position: absolute;
+    top: 30vh;
+    bottom: 30vh;
     text-align: center;
     font-family: monospace;
-    font-size: 60px;
+    font-size: 4vw;
     font-style: italic;
     color: white;
-    margin-top: 200px;
+    margin-top: 20px;
     margin-bottom: 150px;
     margin-left: 100px;
     margin-right: 100px;
@@ -81,30 +85,30 @@ body {
   .poetic-text {
     position: absolute;
     left: 50%;
-    bottom: 3%;
+    bottom: 1%;
     text-align: center;
     transform: translateX(-50%);
     font-family: monospace;
-    font-size: 12px;
+    font-size: 10px;
     color: white;
     opacity: 50%;
   }
 
   .startcam-button {
     position: absolute;
-    left: 20%;
-    top: 60%;
+    left: 5vw;
+    top: 63%;
     font-family: monospace;
     /* background-color: white; */
     color: rgb(34, 158, 0); 
     border-color: rgb(48, 221, 0);
     border-style: solid; 
     /* border-radius: 10px; */
-    height: 40px;
-    width: 180px; 
+    height: 5vh;
+    width: 25vw; 
+    font-size: 2vh; 
     cursor: pointer;
     font-weight: bold; 
-    font-size: 18px; 
     transition: 0.5; 
   }
 
@@ -115,19 +119,19 @@ body {
 
   .upload-button {
     position: absolute;
-    left: 20%;
-    top: 70%;
+    left: 5%;
+    bottom: 20%;
     font-family: monospace;
     /* background-color: white; */
     color: rgb(160, 0, 0); 
     border-color: rgb(255, 0, 0);
     border-style: solid; 
     /* border-radius: 10px; */
-    height: 40px;
-    width: 180px; 
+    height: 5vh;
+    width: 25vw; 
+    font-size: 2vh; 
     cursor: pointer;
     font-weight: bold; 
-    font-size: 18px; 
     transition: 0.5; 
   }
 
@@ -138,19 +142,19 @@ body {
 
   #about-button {
     position: absolute;
-    top: 60%;
-    right: 20%;
+    top: 63%;
+    right: 5%;
     font-family: monospace;
     /* background-color: white; */
     color: rgb(0, 0, 165); 
     border-color: blue;
     border-style: solid; 
     /* border-radius: 10px; */
-    height: 40px;
-    width: 180px; 
+    height: 5vh;
+    width: 25vw; 
+    font-size: 2vh; 
     cursor: pointer;
     font-weight: bold; 
-    font-size: 18px; 
     transition: 0.5; 
   }
   
@@ -159,25 +163,48 @@ body {
     color: white;
   }
 
-  #tech-button {
+  #metadata-button {
     position: absolute;
-    top: 70%;
-    right: 20%;
+    bottom: 25%;
+    right: 5%;
     font-family: monospace;
     /* background-color: white; */
     color: rgb(0, 0, 165); 
     border-color: blue;
     border-style: solid; 
     /* border-radius: 10px; */
-    height: 40px;
-    width: 180px; 
+    height: 5vh;
+    width: 25vw; 
+    font-size: 1.8vh; 
     cursor: pointer;
     font-weight: bold; 
-    font-size: 18px; 
     transition: 0.5; 
   }
   
-  #tech-button:hover {
+  #metadata-button:hover {
+    background-color: blue;
+    color: white;
+  }
+
+  #ai-button {
+    position: absolute;
+    bottom: 18%;
+    right: 5%;
+    font-family: monospace;
+    /* background-color: white; */
+    color: rgb(0, 0, 165); 
+    border-color: blue;
+    border-style: solid; 
+    /* border-radius: 10px; */
+    height: 5vh;
+    width: 25vw; 
+    font-size: 1.8vh; 
+    cursor: pointer;
+    font-weight: bold; 
+    transition: 0.5; 
+  }
+  
+  #ai-button:hover {
     background-color: blue;
     color: white;
   }
@@ -188,18 +215,28 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 600px;
-    height: 1000px;
+    width: 60vw;
+    height: 85vh;
   }
 
-  #techpopupFrame {
+  #metadatapopupFrame {
     display: none;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 600px;
-    height: 1000px;
+    width: 60vw;
+    height: 85vh;
+  }
+
+  #aipopupFrame {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60vw;
+    height: 85vh;
   }
 
   .your-wish {
@@ -219,10 +256,13 @@ body {
 
   img {
     position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 110px;
-    width: 30vw;
+    /* top: 50%; */
+    left: 5%;
+    /* transform: translateY(-50%); */
+    bottom: 60px;
+    width: 90vw;
+    opacity: 60%;
+    z-index: -1000;
   }
 
   /* Centered Camera Container */
