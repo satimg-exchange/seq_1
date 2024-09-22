@@ -139,7 +139,7 @@ body {
   #about-button {
     position: absolute;
     top: 60%;
-    right: 25%;
+    right: 20%;
     font-family: monospace;
     /* background-color: white; */
     color: rgb(0, 0, 165); 
@@ -147,7 +147,7 @@ body {
     border-style: solid; 
     /* border-radius: 10px; */
     height: 40px;
-    width: 80px; 
+    width: 180px; 
     cursor: pointer;
     font-weight: bold; 
     font-size: 18px; 
@@ -170,7 +170,7 @@ body {
     border-style: solid; 
     /* border-radius: 10px; */
     height: 40px;
-    width: 170px; 
+    width: 180px; 
     cursor: pointer;
     font-weight: bold; 
     font-size: 18px; 
