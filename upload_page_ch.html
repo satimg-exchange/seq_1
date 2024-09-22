@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="config.js"></script>
   <script src="about.js"></script>
+  <script src="techpipeline.js"></script>
   <script src="app.js" defer></script>
     <!-- Include Axios CDN -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -28,7 +29,9 @@
     </p>
 
     <p class="text">
-      如果你可以上传一张图片到太空让所有人都看得到，你会上传什么？
+      如果可以上传一张图片到太空，让所有人都看得到，
+      <br>
+      你会上传什么？
     </p>
 
     <img src="xu-studio-img_SCA test.png">
@@ -53,8 +56,11 @@
 
     <p id="locationData" class="location-data"></p>
 
-    <button id="about-button" onclick="toggleIframe()">关于</button>
-    <iframe id="popupFrame" src="about.html"></iframe>
+    <button id="about-button" onclick="abouttoggleIframe()">关于</button>
+    <iframe id="aboutpopupFrame" src="about.html"></iframe>
+
+    <button id="tech-button" onclick="techtoggleIframe()">技术流程</button>
+    <iframe id="techpopupFrame" src="techpipeline.html"></iframe>
 
     <p class="poetic-text">
       本项目为《徐冰艺术卫星创作驻留项目》“艺术星链计划”委任
