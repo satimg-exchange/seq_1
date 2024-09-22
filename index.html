@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="config.js"></script>
   <script src="about.js"></script>
+  <script src="techpipeline.js"></script>
   <script src="app.js" defer></script>
     <!-- Include Axios CDN -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -28,7 +29,11 @@
     </p>
 
     <p class="text">
-      If you could send one image you capture to space for everyone to see, what would you upload? 
+      If you could send one image that you capture 
+      <br>
+      to space for everyone to see, 
+      <br>
+      what would you upload? 
     </p>
 
     <img src="xu-studio-img_SCA test.png">
@@ -50,13 +55,18 @@
   <!-- Camera Control Buttons inside the container -->
   <button id="switchButton" class="switchcam-button">Switch Camera</button>
   <button id="captureButton" class="capture-button">Take Photo</button>
+  
 </div>
 
 
     <p id="locationData" class="location-data"></p>
 
-    <button id="about-button" onclick="toggleIframe()">About</button>
-    <iframe id="popupFrame" src="about.html"></iframe>
+    <button id="about-button" onclick="abouttoggleIframe()">About</button>
+    <iframe id="aboutpopupFrame" src="about.html"></iframe>
+
+    <button id="tech-button" onclick="techtoggleIframe()">Tech Pipeline</button>
+    <iframe id="techpopupFrame" src="techpipeline.html"></iframe>
+
 
     <p class="poetic-text">
       This is a commissioned work for the Star Chain of Arts Project at the Xu Bing Space Art Residency Program. 
