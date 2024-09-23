@@ -25,22 +25,25 @@
       <br><a href="upload_page_ch.html">中文</a>
     </h3>
 
-    <p class="title">
-      send your image to space.
-    </p>
+    <div class="title">
+      <p >
+       > send your image to space. 
+     </p>
+    </div>
 
-    <p class="text">
-      If you could send one image that you capture to space for everyone to see, 
-      what would you upload? 
+    <div class="text">
+      <p>
+        If you could send one image into space for everyone to see, what would you choose to upload?
     </p>
+    </div>
 
     <img src="xu-studio-img_SCA test.png">
 
     <!-- Start Camera Button -->
-    <button id="startCameraButton" class="startcam-button">Start Camera</button>
+    <button id="startCameraButton" class="startcam-button">START CAMERA</button>
 
     <!-- Local Upload Button -->
-    <button id="uploadLocalButton" class="upload-button">Local Upload</button>
+    <button id="uploadLocalButton" class="upload-button">LOCAL UPLOAD</button>
     <input type="file" id="localImageInput" style="display:none;" />
 
 <!-- Modal/Container for Camera and Buttons -->
@@ -51,20 +54,23 @@
   <canvas id="canvas" style="display:none;"></canvas>
 
   <!-- Camera Control Buttons inside the container -->
-  <button id="switchButton" class="switchcam-button">Switch Camera</button>
-  <button id="captureButton" class="capture-button">Take Photo</button>
+  <button id="switchButton" class="switchcam-button">SWITCH CAMERA</button>
+  <button id="captureButton" class="capture-button">TAKE PHOTO</button>
   
 </div>
 
 
     <p id="locationData" class="location-data"></p>
 
-    <button id="about-button" onclick="abouttoggleIframe()">About</button>
-    <button id="metadata-button" onclick="metadatatoggleIframe()">Image Metadata</button>
-    <button id="ai-button" onclick="aitoggleIframe()">AI Pipeline</button>
+    <button id="about-button" onclick="abouttoggleIframe()">ABOUT</button>
+    <button id="metadata-button" onclick="metadatatoggleIframe()">IMAGE METADATA</button>
+    <button id="ai-button" onclick="aitoggleIframe()">EXCHANGE INTELLIGENCE</button>
+    <button id="updates-button" onclick="updatestoggleIframe()">UPDATES</button>
     <iframe id="aboutpopupFrame" src="about.html"></iframe>
     <iframe id="metadatapopupFrame" src="metadata.html"></iframe>
     <iframe id="aipopupFrame" src="aipipeline.html"></iframe>
+    <iframe id="updatespopupFrame" src="updates.html"></iframe>
+
 
 
     <p class="poetic-text">
