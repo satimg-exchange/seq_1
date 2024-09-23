@@ -45,3 +45,19 @@ function closemetadatatoggleIframe() {
     iframe.style.display = 'none';
   }
 }
+
+function updatestoggleIframe() {
+  const iframe = document.getElementById('updatespopupFrame');
+  // If display is empty (not yet set) or 'none', show the iframe
+  if (iframe.style.display === 'none' || iframe.style.display === '') {
+      iframe.style.display = 'block';
+  }
+}
+
+function closeupdatestoggleIframe() {
+  const iframe = document.getElementById('updatespopupFrame');
+  // Close iframe when 'X' is clicked
+  if (iframe.style.display === 'block') {
+    iframe.style.display = 'none';
+  }
+}
