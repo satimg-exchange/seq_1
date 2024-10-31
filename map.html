@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;  /* Full height within the iframe */
+      width: 100%;   /* Full width within the iframe */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: black;
+    }
+
+    /* Map container centered and taking 50% of iframe */
+    #map {
+      width: 99%;   /* 50% of iframe width */
+      height: 99%;  /* 50% of iframe height */
+      border: 10px solid white; /* Optional border to visualize map boundaries */
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    // Initialize the map
+
+    // Fetch and place markers from pinned files
+    const JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI4MGY2MzY2Mi00MWQ1LTQyOGYtOTUxYS0wMDg1ODIwMjY2ZTYiLCJlbWFpbCI6InBjb3NoZWEyQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaW5fcG9saWN5Ijp7InJlZ2lvbnMiOlt7ImlkIjoiRlJBMSIsImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxfSx7ImlkIjoiTllDMSIsImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxfV0sInZlcnNpb24iOjF9LCJtZmFfZW5hYmxlZCI6ZmFsc2UsInN0YXR1cyI6IkFDVElWRSJ9LCJhdXRoZW50aWNhdGlvblR5cGUiOiJzY29wZWRLZXkiLCJzY29wZWRLZXlLZXkiOiI3NDJmOTBmN2QxYjcwZDZkNjUwNiIsInNjb3BlZEtleVNlY3JldCI6ImFkODU3YTJhNmJmMmQ1Y2Q5ODdiMzRlNjM4ZWIwNjAyYTk1ZTlmODZjMzYwYTA2ZjJlZmY5MTdkZmYwNWU1ZjIiLCJpYXQiOjE3MjYzMzkyMDJ9.HqFIo_7uTKZc-QwnEePMqjWByBc-21vFG-6AlUgX-so';
+
+
+
+
+
+    function initializeMap() {
+    map = L.map('map').setView([0, 0], 2); // Use the 'map' ID here
+    L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        minZoom: 2,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+}
+
+// Function to fetch pinned files and display locations on the map
+async function fetchPinnedFiles() {
+    try {
+        const res = await axios.get('https://api.pinata.cloud/data/pinList', {
+            headers: {
+                Authorization: `Bearer ${JWT}`,
+            },
+        });
+
+        const pinnedFiles = res.data.rows;
+        const activeFiles = pinnedFiles.filter(file => file.date_unpinned === null);
+
+        // Clear existing map markers
+        if (map) map.eachLayer(layer => { if (layer instanceof L.Marker) map.removeLayer(layer); });
+
+        activeFiles.forEach(file => {
+            const metadata = file.metadata?.keyvalues || {};
+            console.log(file, metadata);
+            const lat = parseFloat(metadata.latitude);
+            const lng = parseFloat(metadata.longitude);
+            const ipfsHash = file.ipfs_pin_hash;
+            const datePinned = new Date(file.date_pinned).toLocaleDateString('en-US');
+
+            if (!isNaN(lat) && !isNaN(lng) && ipfsHash) {
+                const imageUrl = `https://ipfs.io/ipfs/${ipfsHash}`;
+                // Place marker on map
+                const customIcon = L.icon({
+                    iconUrl: imageUrl,         // Use IPFS image as marker icon
+                    iconSize: [50, 50],        // Adjust icon size as needed
+                    iconAnchor: [25, 50],      // Adjust anchor to position properly
+                    popupAnchor: [0, -50]      // Position popup above the icon
+                });
+
+                // Place marker on map with custom icon
+                const marker = L.marker([lat, lng], { icon: customIcon })
+                    .addTo(map)
+                    .bindPopup(
+                        `<strong>${file.metadata?.name || 'No name'}</strong><br>
+                        Latitude: ${lat}, Longitude: ${lng}<br>
+                        <img src="${imageUrl}" alt="IPFS Image" class="marker-img"><br>
+                        Date: ${datePinned}<br>`);
+
+                                // Add click event listener to zoom into marker when clicked
+                marker.on('click', () => {
+                    map.setView([lat, lng], 13); // Zoom level 15 for closer view; adjust as needed
+                });
+                                        // Calculate 1-mile bounding box
+                const mileInDegreesLat = 0.05;
+                const mileInDegreesLng = 0.05 / Math.cos(lat * Math.PI / 180);
+
+                const bounds = [
+                    [lat - mileInDegreesLat / 2, lng - mileInDegreesLng / 2], // Southwest corner
+                    [lat + mileInDegreesLat / 2, lng + mileInDegreesLng / 2]  // Northeast corner
+                ];
+
+                // Draw the bounding box
+                L.rectangle(bounds, { color: "#ff7800", weight: 1, fillOpacity: 0.2 }).addTo(map);
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching pinned files:', error);
+        alert('Failed to fetch pinned files. Please try again.');
+    }
+}
+
+// Call fetchPinnedFiles on page load and initialize map
+document.addEventListener("DOMContentLoaded", async () => {
+    initializeMap();
+    await fetchPinnedFiles();
+});
+
+
+
+  </script>
+    <button id="closeFrame" class="close-button" onclick="parent.closemaptoggleIframe()">X</button>
+
+</body>
+</html>

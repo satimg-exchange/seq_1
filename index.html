@@ -11,7 +11,8 @@
   <script src="app.js" defer></script>
     <!-- Include Axios CDN -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 </head>
 
 <body>
@@ -66,15 +67,18 @@
     <button id="metadata-button" onclick="metadatatoggleIframe()">IMAGE METADATA</button>
     <button id="ai-button" onclick="aitoggleIframe()">EXCHANGE INTELLIGENCE</button>
     <button id="updates-button" onclick="updatestoggleIframe()">UPDATES</button>
+    <button id="map-button" onclick="maptoggleIframe()">MAP</button>
     <iframe id="aboutpopupFrame" src="about.html"></iframe>
     <iframe id="metadatapopupFrame" src="metadata.html"></iframe>
     <iframe id="aipopupFrame" src="aipipeline.html"></iframe>
     <iframe id="updatespopupFrame" src="updates.html"></iframe>
-
+    <iframe id="mappopupFrame" src="map.html"></iframe>
 
 
     <p class="poetic-text">
       This is a commissioned work for the Star Chain of Arts Project at the Xu Bing Space Art Residency Program. 
     </p>
+    
 </body>
+
 </html>

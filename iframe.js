@@ -61,3 +61,17 @@ function closeupdatestoggleIframe() {
     iframe.style.display = 'none';
   }
 }
+
+
+function maptoggleIframe() {
+  const iframe = document.getElementById('mappopupFrame');
+  iframe.style.display = iframe.style.display === 'none' || iframe.style.display === '' ? 'block' : 'none';
+}
+
+function closemaptoggleIframe() {
+  const iframe = document.getElementById('mappopupFrame');
+  // Close iframe when 'X' is clicked
+  if (iframe.style.display === 'block') {
+    iframe.style.display = 'none';
+  }
+}

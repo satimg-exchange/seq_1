@@ -347,3 +347,53 @@ body {
 .close-button:hover {
   color: rgb(238, 255, 0);
 }
+
+
+
+/* Map iframe styling, matching other iframes */
+/* Map iframe styling */
+#mappopupFrame {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 85vw;   /* Fixed width of the iframe */
+  height: 85vh;  /* Fixed height of the iframe */
+  border: none;
+  z-index: 1000;
+}
+
+
+/* Style for MAP button */
+#map-button {
+  position: absolute;
+  bottom: 7%;
+  right: 5%;
+  font-family: monospace;
+  color: rgb(0, 0, 165); 
+  border-color: blue;
+  border-style: solid; 
+  height: 5vh;
+  width: 25vw; 
+  font-size: 1.8vh; 
+  cursor: pointer;
+  font-weight: bold; 
+  transition: 0.5;
+}
+
+#map-button:hover {
+  background-color: rgb(103, 103, 103);
+  color: white;
+}
+
+/* Custom styling for marker images in popups */
+.marker-img {
+  width: 100px;       /* Set a fixed width */
+  height: auto;       /* Maintain aspect ratio */
+  border-radius: 8px; /* Add rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional shadow for depth */
+  margin-top: 5px;    /* Space between text and image */
+  position: static !important;
+  opacity: 100%;
+}

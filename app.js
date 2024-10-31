@@ -12,10 +12,12 @@
     const locationData = document.getElementById('locationData');
     const uploadLocalButton = document.getElementById('uploadLocalButton');
     const localImageInput = document.getElementById('localImageInput');
+
   
     let useFrontCamera = false;
     let stream = null;
     let location = { latitude: null, longitude: null };
+    let map; // Map instance
   
     // Close camera modal when 'X' is clicked
     closeCameraButton.addEventListener('click', () => {
@@ -184,5 +186,8 @@
       }
     });
   
+
   })();
   
+
+
