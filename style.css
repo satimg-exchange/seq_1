@@ -39,7 +39,7 @@ body {
     position: absolute;
     /* justify-content: center; */
     align-items: center;
-    top: 25vw;
+    top: 20vw;
     left: 1vw;
     font-size: 5.7vw;
     text-align: center;
@@ -467,7 +467,7 @@ body {
 /* Style for MAP button */
 #map-button {
   position: absolute;
-  bottom: 260px;
+  bottom: 300px;
   right: 42%;
   font-family: monospace;
   color: black;
