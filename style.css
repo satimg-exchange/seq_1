@@ -13,7 +13,7 @@ body {
   .lang {
       position: absolute;
       text-align: right;
-      top: 10%;
+      top: 3%;
       right: 1.5vw;
       font-family: monospace;
       font-size: 1.5vh;
@@ -39,7 +39,7 @@ body {
     position: absolute;
     /* justify-content: center; */
     align-items: center;
-    top: 1vw;
+    top: 15vw;
     left: 1vw;
     font-size: 5.5vw;
     text-align: center;
@@ -57,7 +57,7 @@ body {
     bottom: 30vh;
     /* text-align: center; */
     font-family: monospace;
-    font-size: 4vh;
+    font-size: 3vh;
     font-style: italic;
     color: white;
     margin-top: 50px;
@@ -69,6 +69,19 @@ body {
   .info {
     position: absolute;
     top: 8%;
+    left: 5%;
+    right: 5%;
+    /* text-align: center; */
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    font-style: italic;
+    color: white;
+  }
+
+  .data {
+    position: absolute;
+    top: 32%;
     left: 5%;
     right: 5%;
     /* text-align: center; */
@@ -160,32 +173,9 @@ body {
     color: white;
   }
 
-  #metadata-button {
-    position: absolute;
-    bottom: 28%;
-    right: 5%;
-    font-family: monospace;
-    /* background-color: white; */
-    color: rgb(0, 0, 165); 
-    border-color: blue;
-    border-style: solid; 
-    /* border-radius: 10px; */
-    height: 5vh;
-    width: 25vw; 
-    font-size: 1.8vh; 
-    cursor: pointer;
-    font-weight: bold; 
-    transition: 0.5; 
-  }
-  
-  #metadata-button:hover {
-    background-color: blue;
-    color: white;
-  }
-
   #ai-button {
     position: absolute;
-    bottom: 21%;
+    top: 67%;
     right: 5%;
     font-family: monospace;
     /* background-color: white; */
@@ -195,7 +185,7 @@ body {
     /* border-radius: 10px; */
     height: 5vh;
     width: 25vw; 
-    font-size: 1.7vh; 
+    font-size: 2vh; 
     cursor: pointer;
     font-weight: bold; 
     transition: 0.5; 
@@ -206,9 +196,9 @@ body {
     color: white;
   }
 
-  #updates-button {
+  #metadata-button {
     position: absolute;
-    bottom: 14%;
+    top: 74%;
     right: 5%;
     font-family: monospace;
     /* background-color: white; */
@@ -218,7 +208,53 @@ body {
     /* border-radius: 10px; */
     height: 5vh;
     width: 25vw; 
-    font-size: 1.8vh; 
+    font-size: 2vh; 
+    cursor: pointer;
+    font-weight: bold; 
+    transition: 0.5; 
+  }
+  
+  #metadata-button:hover {
+    background-color: blue;
+    color: white;
+  }
+
+  #research-button {
+    position: absolute;
+    top: 81%;
+    right: 5%;
+    font-family: monospace;
+    /* background-color: white; */
+    color: rgb(0, 0, 165); 
+    border-color: blue;
+    border-style: solid; 
+    /* border-radius: 10px; */
+    height: 5vh;
+    width: 25vw; 
+    font-size: 2vh; 
+    cursor: pointer;
+    font-weight: bold; 
+    transition: 0.5; 
+  }
+  
+  #research-button:hover {
+    background-color: blue;
+    color: white;
+  }
+
+  #updates-button {
+    position: absolute;
+    top: 88%;
+    right: 5%;
+    font-family: monospace;
+    /* background-color: white; */
+    color: rgb(0, 0, 165); 
+    border-color: blue;
+    border-style: solid; 
+    /* border-radius: 10px; */
+    height: 5vh;
+    width: 25vw; 
+    font-size: 1.9vh; 
     cursor: pointer;
     font-weight: bold; 
     transition: 0.5; 
@@ -228,6 +264,7 @@ body {
     background-color: blue;
     color: white;
   }
+
 
   #aboutpopupFrame {
     display: none;
@@ -250,6 +287,16 @@ body {
   }
 
   #aipopupFrame {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 85vw;
+    height: 85vh;
+  }
+
+  #researchpopupFrame {
     display: none;
     position: absolute;
     top: 50%;
@@ -368,14 +415,14 @@ body {
 /* Style for MAP button */
 #map-button {
   position: absolute;
-  bottom: 7%;
-  right: 5%;
+  bottom: 210px;
+  right: 42%;
   font-family: monospace;
-  color: rgb(0, 0, 165); 
-  border-color: blue;
+  color: black;
+  border-color: white;
   border-style: solid; 
   height: 5vh;
-  width: 25vw; 
+  width: 15vw; 
   font-size: 1.8vh; 
   cursor: pointer;
   font-weight: bold; 
