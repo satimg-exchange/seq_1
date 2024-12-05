@@ -62,6 +62,21 @@ function closeupdatestoggleIframe() {
   }
 }
 
+function researchtoggleIframe() {
+  const iframe = document.getElementById('researchpopupFrame');
+  // If display is empty (not yet set) or 'none', show the iframe
+  if (iframe.style.display === 'none' || iframe.style.display === '') {
+      iframe.style.display = 'block';
+  }
+}
+
+function closeresearchtoggleIframe() {
+  const iframe = document.getElementById('researchpopupFrame');
+  // Close iframe when 'X' is clicked
+  if (iframe.style.display === 'block') {
+    iframe.style.display = 'none';
+  }
+}
 
 function maptoggleIframe() {
   const iframe = document.getElementById('mappopupFrame');
