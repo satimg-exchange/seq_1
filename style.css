@@ -68,7 +68,7 @@ body {
 
   .info {
     position: absolute;
-    top: 8%;
+    top: 8vh;
     left: 5%;
     right: 5%;
     /* text-align: center; */
@@ -81,7 +81,7 @@ body {
 
   .info-list {
     position: absolute;
-    top: 15%;
+    top: 15vh;
     left: 5%;
     right: 5%;
     /* text-align: center; */
@@ -94,7 +94,7 @@ body {
 
   .info-exchange {
     position: absolute;
-    top: 25%;
+    top: 30vh;
     left: 5%;
     right: 5%;
     /* text-align: center; */
@@ -107,7 +107,7 @@ body {
 
   .data {
     position: absolute;
-    top: 48%;
+    top: 58vh;
     left: 5%;
     right: 5%;
     /* text-align: center; */
@@ -120,7 +120,7 @@ body {
 
   .data-list {
     position: absolute;
-    top: 55%;
+    top: 65vh;
     left: 5%;
     right: 5%;
     /* text-align: center; */
@@ -133,7 +133,7 @@ body {
 
   .data-exchange {
     position: absolute;
-    top: 65%;
+    top: 82vh;
     left: 5%;
     right: 5%;
     /* text-align: center; */
