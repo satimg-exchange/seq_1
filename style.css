@@ -39,9 +39,9 @@ body {
     position: absolute;
     /* justify-content: center; */
     align-items: center;
-    top: 15vw;
+    top: 18vw;
     left: 1vw;
-    font-size: 5.5vw;
+    font-size: 5.7vw;
     text-align: center;
     color: white;
     font-family: monospace;
@@ -53,7 +53,7 @@ body {
     justify-content: center;
     align-items: center;
     position: absolute;
-    top: 15vh;
+    top: 20vh;
     bottom: 30vh;
     /* text-align: center; */
     font-family: monospace;
@@ -254,7 +254,7 @@ body {
     /* border-radius: 10px; */
     height: 5vh;
     width: 25vw; 
-    font-size: 1.9vh; 
+    font-size: 2vh; 
     cursor: pointer;
     font-weight: bold; 
     transition: 0.5; 
@@ -415,7 +415,7 @@ body {
 /* Style for MAP button */
 #map-button {
   position: absolute;
-  bottom: 210px;
+  bottom: 260px;
   right: 42%;
   font-family: monospace;
   color: black;
