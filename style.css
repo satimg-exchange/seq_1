@@ -79,6 +79,20 @@ body {
     color: white;
   }
 
+
+  .path {
+    position: absolute;
+    top: 500px;
+    left: 5%;
+    right: 5%;
+    /* text-align: center; */
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    font-style: italic;
+    color: white;
+  }
+
   .info-list {
     position: absolute;
     top: 15vh;
@@ -368,7 +382,7 @@ body {
     height: 85vh;
   }
 
-  img {
+  img.sca {
     position: absolute;
     /* top: 50%; */
     left: 5%;
