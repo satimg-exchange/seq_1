@@ -82,8 +82,7 @@ body {
 
   .path {
     position: absolute;
-    top: 500px;
-    margin-bottom: 400px;
+    top: 600px;
     left: 5%;
     right: 5%;
     /* text-align: center; */
