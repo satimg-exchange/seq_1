@@ -81,8 +81,8 @@ body {
 
 
   .path {
-    position: absolute;
-    top: 900px;
+    position: relative;
+    top: 500px;
     left: 5%;
     right: 5%;
     /* text-align: center; */
