@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Satellite Triangulation Visualization</title>
+  <style>
+    body { margin: 0; }
+    canvas { display: block; }
+    #ui {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="ui">
+    <label for="latitude">Latitude:</label>
+    <input type="number" id="latitude" step="0.01"><br><br>
+    <label for="longitude">Longitude:</label>
+    <input type="number" id="longitude" step="0.01"><br><br>
+    <button id="calculate">Calculate & Visualize</button>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/satellite.js/dist/satellite.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <script type="module">
+    import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/controls/OrbitControls.js";
+    const JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI4MGY2MzY2Mi00MWQ1LTQyOGYtOTUxYS0wMDg1ODIwMjY2ZTYiLCJlbWFpbCI6InBjb3NoZWEyQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaW5fcG9saWN5Ijp7InJlZ2lvbnMiOlt7ImlkIjoiRlJBMSIsImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxfSx7ImlkIjoiTllDMSIsImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxfV0sInZlcnNpb24iOjF9LCJtZmFfZW5hYmxlZCI6ZmFsc2UsInN0YXR1cyI6IkFDVElWRSJ9LCJhdXRoZW50aWNhdGlvblR5cGUiOiJzY29wZWRLZXkiLCJzY29wZWRLZXlLZXkiOiI3NDJmOTBmN2QxYjcwZDZkNjUwNiIsInNjb3BlZEtleVNlY3JldCI6ImFkODU3YTJhNmJmMmQ1Y2Q5ODdiMzRlNjM4ZWIwNjAyYTk1ZTlmODZjMzYwYTA2ZjJlZmY5MTdkZmYwNWU1ZjIiLCJpYXQiOjE3MjYzMzkyMDJ9.HqFIo_7uTKZc-QwnEePMqjWByBc-21vFG-6AlUgX-so';
+
+    // Constants for Earth and scaling
+    const EARTH_RADIUS = 6371; // in km
+    const SCALE_FACTOR = 0.01; // Scale everything down for visibility in Three.js
+    const SCALE_FACTOR_Z = 0.015; // Scale everything down for visibility in Three.js
+
+    let lastPlottedECI = { x: 0, y: 0, z: 0 }; // Initialize with Earth's center
+
+    // Convert degrees to radians
+    function degreesToRadians(degrees) {
+        return (degrees * Math.PI) / 180;
+    }
+
+    function convertLatLongTo3D(latitude, longitude, scaleFactor = SCALE_FACTOR) {
+    const phi = degreesToRadians(90 - latitude); // Convert latitude to radians
+    const theta = degreesToRadians(-longitude); // Reverse longitude to match GeoJSON
+
+    const x = EARTH_RADIUS * Math.sin(phi) * Math.cos(theta) * scaleFactor;
+    const y = EARTH_RADIUS * Math.cos(phi) * scaleFactor;
+    const z = EARTH_RADIUS * Math.sin(phi) * Math.sin(theta) * scaleFactor;
+
+    return { x, y, z };
+}
+
+function geodeticToECI(latitude, longitude, altitude = 0) {
+    return convertLatLongTo3D(latitude, longitude, SCALE_FACTOR);
+}
+
+    function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+    // Fetch satellite ECI coordinates for a specific time
+    async function fetchSatelliteECIForTime(timestamp) {
+    const satId = '58924'; // Replace with the appropriate satellite NORAD ID
+    const tleUrl = `https://tle.ivanstanojevic.me/api/tle/${satId}`;
+    
+    try {
+        const response = await fetch(tleUrl);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch TLE data: ${response.statusText}`);
+        }
+        const data = await response.json();
+
+        const { line1, line2 } = data;
+        const satrec = satellite.twoline2satrec(line1, line2);
+
+        const positionAndVelocity = satellite.propagate(satrec, timestamp);
+
+        if (!positionAndVelocity.position) {
+            throw new Error("Failed to calculate satellite position.");
+        }
+
+        const { x, y, z } = positionAndVelocity.position;
+        return { x: x * SCALE_FACTOR, y: y * SCALE_FACTOR, z: z * SCALE_FACTOR_Z };
+    } catch (error) {
+        console.error("Error fetching TLE data:", error);
+        throw error;
+    }
+}
+
+// Constants for local storage key
+const LOCAL_STORAGE_KEY = 'satelliteData';
+
+// Function to save data to local storage
+function saveDataToLocalStorage(data) {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+}
+
+// Function to load data from local storage
+function loadDataFromLocalStorage() {
+    const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return data ? JSON.parse(data) : null;
+}
+
+
+
+
+// Fetch pinned files and save the combined data if not already cached
+async function fetchPinnedFilesAndPlot() {
+    let combinedData = loadDataFromLocalStorage(); // Load the cached data
+    if (!combinedData) {
+        console.log('No cached data found. Fetching new data...');
+        try {
+            let allPinnedFiles = [];
+            let pageOffset = 0;
+            const pageLimit = 100; // Adjust this to the maximum limit allowed by the API (e.g., 100).
+
+            while (true) {
+                const res = await axios.get('https://api.pinata.cloud/data/pinList', {
+                    headers: {
+                        Authorization: `Bearer ${JWT}`,
+                    },
+                    params: {
+                        pageLimit: pageLimit,
+                        pageOffset: pageOffset,
+                    },
+                });
+
+                const { rows } = res.data;
+
+                if (!rows || rows.length === 0) {
+                    break; // Exit loop when no more results
+                }
+
+                allPinnedFiles = allPinnedFiles.concat(rows);
+                pageOffset += rows.length; // Move to the next set of files
+            }
+
+            console.log(allPinnedFiles); // Log all pinned files
+            const activeFiles = allPinnedFiles.filter(file => file.date_unpinned === null);
+
+            // Sort files by timestamp
+            activeFiles.sort((a, b) => new Date(a.date_pinned) - new Date(b.date_pinned));
+
+            combinedData = [];
+
+            for (const file of activeFiles) {
+                const metadata = file.metadata?.keyvalues || {};
+                const lat = parseFloat(metadata.latitude);
+                const lng = parseFloat(metadata.longitude);
+                const timestamp = new Date(file.date_pinned);
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    // Convert uploaded image location to ECI
+                    const userECI = geodeticToECI(lat, lng);
+
+                    // Fetch satellite ECI for the timestamp
+                    const satelliteECI = await fetchSatelliteECIForTime(timestamp);
+
+                    // Combine data for this file
+                    combinedData.push({
+                        ipfsFile: file,
+                        metadata: { latitude: lat, longitude: lng },
+                        userECI,
+                        satelliteECI,
+                        timestamp,
+                    });
+
+                }
+            }
+
+            // Save the combined data to local storage
+            saveDataToLocalStorage(combinedData);
+            console.log('Data saved to local storage.');
+        } catch (error) {
+            console.error('Error fetching pinned files:', error);
+        }
+    } else {
+        console.log('Cached data found. Proceeding to visualization...');
+    }
+
+    // Sort the cached data by timestamp to ensure proper temporal sequencing
+    combinedData.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+    let previousUserECI = { x: 0, y: 0, z: 0 }; // Start with Earth's center
+
+    for (const data of combinedData) {
+        const { userECI, satelliteECI, timestamp } = data;
+        console.log('previous user', previousUserECI, 'current user', userECI);
+
+        // Add points for the user and satellite positions
+        addPoint(userECI, 0xff0000); // User position
+        addPoint(satelliteECI, 0x00ff00); // Satellite position
+
+        // Add lines and triangles to connect points
+        if (previousUserECI) {
+            // Create a triangle connecting the previous user, current user, and current satellite
+            addTriangle(previousUserECI, userECI, satelliteECI, 0xffffff); // Triangle
+
+            // Draw lines for better visualization
+            addLine(previousUserECI, userECI, 0xff0000); // Previous user to current user
+            addLine(userECI, satelliteECI, 0xffffff); // Current user to satellite
+            addLine(previousUserECI, satelliteECI, 0x00ffff); // Previous user to current satellite
+        }
+
+        // Update previous user position for the next iteration
+        previousUserECI = userECI;
+    //    await sleep(1000);
+    }
+}
+
+
+    // Initialize Three.js scene
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+    // Create a group to hold the entire scene's objects
+    const sceneGroup = new THREE.Group();
+    scene.add(sceneGroup);
+    // Add orbit controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true; // For smoother rotation
+    controls.dampingFactor = 0.25;
+
+// Create Earth
+const earthGeometry = new THREE.SphereGeometry(EARTH_RADIUS * SCALE_FACTOR, 32, 32);
+const earthMaterial = new THREE.MeshBasicMaterial({
+    color: 0xfffff,  // Set the color
+    wireframe: true,  // Keep the wireframe if desired
+    transparent: true, // Enable transparency
+    opacity: 0.05,     // Adjust opacity (0.0 is fully transparent, 1.0 is fully opaque)
+});
+const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+sceneGroup.add(earth);
+
+
+    camera.position.z = EARTH_RADIUS * 5 * SCALE_FACTOR;
+
+// Function to add points
+function addPoint(position, color) {
+    const pointGeometry = new THREE.SphereGeometry(150 * SCALE_FACTOR, 16, 16);
+    const pointMaterial = new THREE.MeshBasicMaterial({ color });
+    const point = new THREE.Mesh(pointGeometry, pointMaterial);
+    point.position.set(position.x, position.y, position.z);
+    sceneGroup.add(point);
+}
+
+// Function to add lines
+function addLine(start, end, color) {
+    const material = new THREE.LineBasicMaterial({ color });
+    const geometry = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(start.x, start.y, start.z),
+        new THREE.Vector3(end.x, end.y, end.z),
+    ]);
+    const line = new THREE.Line(geometry, material);
+    sceneGroup.add(line);
+}
+
+// Function to add a triangle (plane) between three points
+function addTriangle(pointA, pointB, pointC, color) {
+    const geometry = new THREE.BufferGeometry();
+
+    // Define vertices for the triangle
+    const vertices = new Float32Array([
+        pointA.x, pointA.y, pointA.z, // Vertex A
+        pointB.x, pointB.y, pointB.z, // Vertex B
+        pointC.x, pointC.y, pointC.z, // Vertex C
+    ]);
+
+    // Set vertices to the geometry
+    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+
+    // Create material for the plane (with texture or color)
+    const material = new THREE.MeshBasicMaterial({
+        color: color, // Set the color of the triangle
+        side: THREE.DoubleSide, // Ensure it's visible from both sides
+        transparent: true, // Optional: make it slightly transparent
+        opacity: 0.2, // Optional: adjust transparency
+    });
+
+    // Create the mesh and add it to the scene
+    const triangle = new THREE.Mesh(geometry, material);
+    sceneGroup.add(triangle);
+}
+
+    // Call the function to fetch and visualize the chain
+    fetchPinnedFilesAndPlot();
+
+
+    // Function to load GeoJSON data
+async function loadGeoJSON(url) {
+    const response = await fetch(url);
+    const data = await response.json();
+    return data;
+}
+
+function convertGeoJSONTo3D(coordinates) {
+    return coordinates.map(([longitude, latitude]) => {
+        const { x, y, z } = convertLatLongTo3D(latitude, longitude);
+        return new THREE.Vector3(x, y, z);
+    });
+}
+
+async function drawBoundaries(geojsonUrls) {
+    const defaultMaterial = new THREE.LineBasicMaterial({ color: 0xfffff, opacity: 0.8, transparent: true }); // Default red for lines
+
+    for (const url of geojsonUrls) {
+        const geojson = await loadGeoJSON(url);
+
+        geojson.features.forEach(feature => {
+            const { type, coordinates } = feature.geometry;
+            const { color, name } = feature.properties; // Extract custom properties
+            const featureGroup = new THREE.Group(); // Create a group for each feature
+
+            // Create material with the feature's color, or fallback to the default material
+            const lineMaterial = color ? new THREE.LineBasicMaterial({
+                color: parseInt(color.replace('#', '0x')),
+                opacity: 0.8,
+                transparent: true
+            }) : defaultMaterial;
+
+            if (type === 'MultiLineString') {
+                coordinates.forEach(lineString => {
+                    const points = convertGeoJSONTo3D(lineString);
+                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                    const line = new THREE.Line(geometry, lineMaterial);
+                    featureGroup.add(line);
+                });
+            } else if (type === 'Polygon') {
+                coordinates.forEach(polygon => {
+                    const points = convertGeoJSONTo3D(polygon);
+                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                    const line = new THREE.LineLoop(geometry, lineMaterial);
+                    featureGroup.add(line);
+                });
+            } else if (type === 'MultiPolygon') {
+                coordinates.forEach(multiPolygon => {
+                    multiPolygon.forEach(polygon => {
+                        const points = convertGeoJSONTo3D(polygon);
+                        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                        const line = new THREE.LineLoop(geometry, lineMaterial);
+                        featureGroup.add(line);
+                    });
+                });
+            }
+
+            // Add feature name as a label (optional)
+            if (name) {
+                const label = createTextLabel(name); // Implement a function to create text labels
+                label.position.set(0, 0, 0); // Adjust position if needed
+                featureGroup.add(label);
+            }
+
+            // Add the feature group to the scene
+            sceneGroup.add(featureGroup);
+        });
+    }
+}
+
+// Example function to create text labels
+function createTextLabel(text) {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    context.font = '24px Arial';
+    context.fillStyle = 'white';
+    context.fillText(text, 10, 50);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+    return new THREE.Sprite(spriteMaterial);
+}
+
+// Call the function with GeoJSON URLs
+drawBoundaries([
+    'https://gist.githubusercontent.com/jrrickard/8755532505a40f3b8317/raw/ecd98849d3a5f4502b773b986254f19af3b8d8fb/oceans.json', // Ocean boundaries
+    'cable-geo.json' // Submarine cables GeoJSON
+]);
+
+
+    // Animate the scene
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // Rotate the entire scene group slowly
+        //sceneGroup.rotation.y += 0.005; // Adjust the speed of rotation as needed
+       // sceneGroup.rotation.z += 0.001;
+        // Render the scene
+        renderer.render(scene, camera);
+    }
+    animate();
+</script>
+</body>
+</html>

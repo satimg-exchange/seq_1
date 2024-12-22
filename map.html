@@ -6,6 +6,8 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.0.0/satellite.min.js"></script>
+
   <link rel="stylesheet" href="style.css">
 
   <style>
@@ -32,6 +34,7 @@
   <div id="map"></div>
   <script>
     // Initialize the map
+    let map, satelliteMarker, satellitePath;
 
     // Fetch and place markers from pinned files
     const JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI4MGY2MzY2Mi00MWQ1LTQyOGYtOTUxYS0wMDg1ODIwMjY2ZTYiLCJlbWFpbCI6InBjb3NoZWEyQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaW5fcG9saWN5Ijp7InJlZ2lvbnMiOlt7ImlkIjoiRlJBMSIsImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxfSx7ImlkIjoiTllDMSIsImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxfV0sInZlcnNpb24iOjF9LCJtZmFfZW5hYmxlZCI6ZmFsc2UsInN0YXR1cyI6IkFDVElWRSJ9LCJhdXRoZW50aWNhdGlvblR5cGUiOiJzY29wZWRLZXkiLCJzY29wZWRLZXlLZXkiOiI3NDJmOTBmN2QxYjcwZDZkNjUwNiIsInNjb3BlZEtleVNlY3JldCI6ImFkODU3YTJhNmJmMmQ1Y2Q5ODdiMzRlNjM4ZWIwNjAyYTk1ZTlmODZjMzYwYTA2ZjJlZmY5MTdkZmYwNWU1ZjIiLCJpYXQiOjE3MjYzMzkyMDJ9.HqFIo_7uTKZc-QwnEePMqjWByBc-21vFG-6AlUgX-so';
@@ -48,6 +51,82 @@
         attribution: '© OpenStreetMap'
     }).addTo(map);
 }
+
+
+let satelliteFuturePath;
+
+async function fetchSatellitePath() {
+  try {
+    const tleUrl = 'https://celestrak.com/NORAD/elements/gp.php?CATNR=58924';
+    const response = await axios.get(tleUrl);
+    const tleData = response.data.split('\n');
+
+    // Parse TLE lines for the satellite
+    const tleLine1 = tleData[1];
+    const tleLine2 = tleData[2];
+    const satrec = satellite.twoline2satrec(tleLine1, tleLine2);
+
+    const currentPathCoordinates = [];
+    const futurePathCoordinates = [];
+
+    // Calculate the past/current path (last 5 minutes)
+    for (let i = -300; i <= 0; i++) {  // Negative interval for past positions (5 minutes back)
+      const time = new Date(Date.now() + i * 1000);
+      const positionAndVelocity = satellite.propagate(satrec, time);
+      const gmst = satellite.gstime(time);
+
+      // Convert to geodetic coordinates
+      const positionGd = satellite.eciToGeodetic(positionAndVelocity.position, gmst);
+      const latitude = satellite.degreesLat(positionGd.latitude);
+      const longitude = satellite.degreesLong(positionGd.longitude);
+
+      currentPathCoordinates.push([latitude, longitude]);
+    }
+
+    // Calculate the future path (next 15 minutes)
+    for (let i = 0; i <= 5000; i += 30) {  // 10-second intervals for smoother future path
+      const time = new Date(Date.now() + i * 1000);
+      const positionAndVelocity = satellite.propagate(satrec, time);
+      const gmst = satellite.gstime(time);
+
+      // Convert to geodetic coordinates
+      const positionGd = satellite.eciToGeodetic(positionAndVelocity.position, gmst);
+      const latitude = satellite.degreesLat(positionGd.latitude);
+      const longitude = satellite.degreesLong(positionGd.longitude);
+
+      futurePathCoordinates.push([latitude, longitude]);
+    }
+
+    // Remove previous paths if they exist
+    if (satellitePath) {
+      map.removeLayer(satellitePath);
+    }
+    if (satelliteFuturePath) {
+      map.removeLayer(satelliteFuturePath);
+    }
+
+    // Draw current/past path on the map (yellow)
+    satellitePath = L.polyline(currentPathCoordinates, { color: 'yellow', weight: 2 }).addTo(map);
+
+    // Draw future path on the map (blue)
+    satelliteFuturePath = L.polyline(futurePathCoordinates, { color: 'blue', weight: 2, dashArray: '5, 10' }).addTo(map);
+
+    // Set the marker to the latest position
+    const [latestLat, latestLng] = currentPathCoordinates[currentPathCoordinates.length - 1];
+    if (satelliteMarker) {
+      satelliteMarker.setLatLng([latestLat, latestLng]);
+    } else {
+      satelliteMarker = L.marker([latestLat, latestLng]).addTo(map).bindPopup(`Satellite NORAD ID: 58924`);
+    }
+
+    // Center the map on the latest satellite position
+   // map.setView([latestLat, latestLng], 4);
+  } catch (error) {
+    console.error('Error fetching satellite path:', error);
+    alert('Failed to fetch satellite path.');
+  }
+}
+
 
 // Function to fetch pinned files and display locations on the map
 async function fetchPinnedFiles() {
@@ -118,6 +197,8 @@ async function fetchPinnedFiles() {
 document.addEventListener("DOMContentLoaded", async () => {
     initializeMap();
     await fetchPinnedFiles();
+    fetchSatellitePath();
+    setInterval(fetchSatellitePath, 15000); // Update satellite position every 5 seconds
 });
 
 
