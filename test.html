@@ -4,18 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Satellite Triangulation Visualization</title>
+  <link rel="stylesheet" href="style.css">
+
   <style>
-    body { margin: 0; }
-    canvas { display: block; }
-    #ui {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 10;
-      background: rgba(255, 255, 255, 0.8);
-      padding: 10px;
-      border-radius: 5px;
-    }
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Prevent scrollbars */
+}
+
+canvas {
+    display: block;
+    width: 100%; /* Ensure it fills the iframe */
+    height: 100%; /* Ensure it fills the iframe */
+}
+
   </style>
 </head>
 <body>
@@ -190,7 +195,9 @@ async function fetchPinnedFilesAndPlot() {
 
         // Add points for the user and satellite positions
         addPoint(userECI, 0xff0000); // User position
-        addPoint(satelliteECI, 0x00ff00); // Satellite position
+        console.log(data);
+        const imageUrl = `https://ipfs.io/ipfs/${data.ipfsFile.ipfs_pin_hash}`; // Use IPFS URL for the image
+await addImageAsPlane(satelliteECI, imageUrl); // Satellite position with image
 
         // Add lines and triangles to connect points
         if (previousUserECI) {
@@ -246,6 +253,39 @@ function addPoint(position, color) {
     point.position.set(position.x, position.y, position.z);
     sceneGroup.add(point);
 }
+
+// Function to add images as planes
+async function addImageAsPlane(position, imageUrl) {
+    const textureLoader = new THREE.TextureLoader();
+    const texture = await new Promise((resolve, reject) => {
+        textureLoader.load(
+            imageUrl,
+            resolve,
+            undefined,
+            reject
+        );
+    });
+
+    const planeWidth = 500 * SCALE_FACTOR; // Adjust width for better visibility
+    const planeHeight = 500 * SCALE_FACTOR; // Adjust height for better visibility
+
+    const planeGeometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+    const planeMaterial = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        side: THREE.DoubleSide // Enable double-sided rendering
+    });
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+    // Position the plane
+    plane.position.set(position.x, position.y, position.z);
+
+    // Orient the plane to always face the camera
+    plane.lookAt(camera.position);
+
+    sceneGroup.add(plane);
+}
+
 
 // Function to add lines
 function addLine(start, end, color) {
@@ -362,6 +402,7 @@ async function drawBoundaries(geojsonUrls) {
 // Example function to create text labels
 function createTextLabel(text) {
     const canvas = document.createElement('canvas');
+    console.log('Canvas attached:', canvas);
     const context = canvas.getContext('2d');
     context.font = '24px Arial';
     context.fillStyle = 'white';
@@ -384,12 +425,14 @@ drawBoundaries([
         requestAnimationFrame(animate);
 
         // Rotate the entire scene group slowly
-        //sceneGroup.rotation.y += 0.005; // Adjust the speed of rotation as needed
-       // sceneGroup.rotation.z += 0.001;
+        sceneGroup.rotation.y += 0.005; // Adjust the speed of rotation as needed
+        sceneGroup.rotation.z += 0.001;
         // Render the scene
         renderer.render(scene, camera);
     }
     animate();
 </script>
+<button id="closeFrame" class="close-button" onclick="parent.closemaptoggleIframe()">X</button>
+
 </body>
 </html>

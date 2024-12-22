@@ -461,15 +461,21 @@ body {
 /* Map iframe styling, matching other iframes */
 /* Map iframe styling */
 #mappopupFrame {
-  display: none;
+  visibility: hidden; /* Initially hidden */
+  opacity: 0;         /* Fully transparent */
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 85vw;   /* Fixed width of the iframe */
-  height: 85vh;  /* Fixed height of the iframe */
+  width: 85vw;
+  height: 85vh;
   border: none;
   z-index: 1000;
+  transition: opacity 0.3s ease; /* Optional fade-in effect */
+}
+#mappopupFrame.visible {
+  visibility: visible; /* Make it visible */
+  opacity: 1;          /* Fully opaque */
 }
 
 

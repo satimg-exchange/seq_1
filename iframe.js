@@ -80,13 +80,24 @@ function closeresearchtoggleIframe() {
 
 function maptoggleIframe() {
   const iframe = document.getElementById('mappopupFrame');
-  iframe.style.display = iframe.style.display === 'none' || iframe.style.display === '' ? 'block' : 'none';
+  const isVisible = iframe.classList.contains('visible');
+  
+  if (!isVisible) {
+    // Make the iframe visible and set the src
+    iframe.src = 'test.html';
+    iframe.classList.add('visible');
+    iframe.style.display = 'block'; // Ensure it's part of the layout
+  } else {
+    // Hide the iframe and clear the src
+    iframe.src = '';
+    iframe.classList.remove('visible');
+    iframe.style.display = 'none'; // Remove from layout
+  }
 }
+
+
 
 function closemaptoggleIframe() {
   const iframe = document.getElementById('mappopupFrame');
-  // Close iframe when 'X' is clicked
-  if (iframe.style.display === 'block') {
-    iframe.style.display = 'none';
-  }
+  iframe.classList.remove('visible'); // Hide the iframe
 }
