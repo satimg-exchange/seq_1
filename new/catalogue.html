@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cartographic Catalogue</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  <style>
+    body { margin: 0; display: grid; grid-template-columns: 360px 1fr; height: 100vh; font-family: Arial, sans-serif; }
+    #catalogue { padding: 12px; overflow-y: auto; background: #fafafa; border-right: 1px solid #ccc; }
+    #catalogue input { width: 100%; padding: 6px; margin-bottom: 14px; border: 1px solid #ccc; border-radius: 4px; }
+    .group { margin-bottom: 24px; }
+    .group h2 { font-size: 1.2em; margin: 8px 0 12px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+    .sheet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 12px; }
+    .sheet-card { background: #fff; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; flex-direction: column; transition: transform .15s, box-shadow .15s; }
+    .sheet-card:hover { transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
+    .sheet-card.highlight { box-shadow: 0 0 0 3px rgba(51,153,255,0.5) !important; }
+    .sheet-card header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f1f1f1; border-bottom: 1px solid #eee; border-top-left-radius: 6px; border-top-right-radius: 6px; }
+    .sheet-card header h3 { margin: 0; font-size: 1em; }
+    .sheet-card header time { font-size: 0.85em; color: #555; }
+    .sheet-card header .copy-coords { background: none; border: none; font-size: 1.1em; cursor: pointer; }
+    .sheet-main { width: 100%; display: block; border-bottom: 1px solid #eee; }
+    .sheet-meta { width: 100%; border-collapse: collapse; font-size: 0.85em; margin: 8px 12px; }
+    .sheet-meta th, .sheet-meta td { padding: 4px 6px; text-align: left; }
+    .sheet-meta th { width: 30%; color: #333; }
+    .sheet-carousel { display: flex; overflow-x: auto; padding: 6px 12px 12px; gap: 6px; }
+    .sheet-carousel img { height: 60px; cursor: pointer; border-radius: 4px; border: 1px solid #ddd; }
+    #map { position: relative; }
+    .popup-img { width: 180px; display: block; margin-bottom: 6px; }
+    .popup-text { font-size: 0.9em; }
+    .image-label div { font-size: 2em; background: rgba(255,255,255,0.8); padding: 6px 12px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div id="catalogue"></div>
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <script>
+            const assetData = [
+      ['C1', 34.2655, 108.8955, '01/30/25, 5:31 PM GMT+8'],
+      ['C2', 31.3896, 121.5225, '12/19/24, 2:24 PM GMT+8'],
+      ['C4', 13.743853, 100.589287, '11/13/24, 9:41 AM GMT+7'],
+      ['C10',22.855908,106.724137,'8/23/24, 12:39 PM GMT+8'],
+      ['C12',31.272038,121.555763,'8/3/24, 6:08 PM GMT+8'],
+      ['C14',31.192763,121.299422,'4/13/24, 8:56 PM GMT+8'],
+      ['C17',34.302837,117.290383,'2/15/24, 12:09 PM GMT+8'],
+      ['C18',34.232463,109.122156,'2/13/24, 3:21 PM GMT+8'],
+      ['C19',22.282508,114.191162,'1/30/24, 10:20 AM GMT+8'],
+      ['C24',18.799705, 98.939112,'1/5/24, 5:45 PM GMT+7'],
+      ['C27',20.350608,100.082856,'1/3/24, 3:47 PM GMT+7'],
+      ['C28',19.912762, 99.824487,'1/2/24, 5:25 PM GMT+7'],
+      ['C30',18.796292, 98.982978,'1/1/24, 5:19 PM GMT+7'],
+      ['P2', 44.918714,-73.124775,'07/27/24, 10:23 PM'],
+      ['P4', 44.971154,-72.896416,'08/25/2024, 6:04 PM'],
+      ['P7', 13.75,100.49, '02/02/24, 12:00 PM'],
+      ['P8', 46.813391,-71.201439,'10/20/2024, 2:31 PM'],
+      ['P10',49.28, -123.105,'11/02/2024, 4:30 PM'],
+      ['P11',45.540081,-73.587824,'01/12/25, 10:00 AM']
+    ];
+    let map, markerMap = {}, currentOverlay = null, nameControl;
+
+    fetch('assets/manifest.json')
+      .then(res => res.ok ? res.json() : Promise.reject(res.status))
+      .then(files => {
+        const grouped = files.reduce((acc,p) => {
+          const parts = p.split('/'), f = parts[1], name = parts.slice(2).join('/');
+          (acc[f] = acc[f] || []).push(name);
+          return acc;
+        }, {});
+        const assets = assetData.map(([id,lat,lon,time]) => {
+          const k = id.toLowerCase(), all = grouped[k] || [], main = `${k}.png`;
+          const vars = all.filter(f => f !== main && !f.startsWith(k + '-map'));
+          return { id, lat, lon, time, main: `assets/${k}/${main}`, variations: vars.map(v => `assets/${k}/${v}`) };
+        });
+        initMap(); addMarkers(assets); buildCatalogue(assets);
+        document.getElementById('filter').addEventListener('input', e => {
+          const t = e.target.value.toLowerCase();
+          buildCatalogue(assets.filter(a => a.id.toLowerCase().includes(t) || a.time.toLowerCase().includes(t)));
+        });
+      }).catch(console.error);
+
+    function initMap() {
+      const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' });
+      const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© ESRI' });
+      map = L.map('map', { layers: [osm] }).setView([25,100],3);
+      L.control.layers({ OSM: osm, Satellite: sat }).addTo(map);
+
+      nameControl = L.control({ position: 'topright' });
+      nameControl.onAdd = function() {
+        this._container = L.DomUtil.create('div', 'image-label');
+        return this._container;
+      };
+      nameControl.update = function(text) {
+        this._container.innerHTML = `<div>${text}</div>`;
+      };
+      nameControl.addTo(map);
+    }
+
+    function addMarkers(list) {
+      list.forEach(a => {
+        const m = L.marker([a.lat,a.lon]).addTo(map);
+        m.bindPopup(
+          `<strong>${a.id}</strong><br><img src="${a.main}" class="popup-img"><div class="popup-text"><strong>Time:</strong> ${a.time}</div>`
+        , { maxWidth: 220 });
+        markerMap[a.id] = m;
+        m.on('click', () => {
+          const card = document.getElementById(`card-${a.id}`);
+          if (card) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            card.classList.add('highlight');
+            setTimeout(() => card.classList.remove('highlight'), 2000);
+          }
+        });
+      });
+    }
+
+    const zoomOverrides = { C17: 17 };
+
+    function buildCatalogue(list) {
+      const cat = document.getElementById('catalogue');
+      const groups = list.reduce((acc,a) => { const l = a.id.charAt(0); (acc[l] = acc[l]||[]).push(a); return acc; }, {});
+
+      Object.keys(groups).sort().forEach(l => {
+        const g = document.createElement('div'); g.className = 'group';
+      //  const h2 = document.createElement('h2'); h2.textContent = l; g.appendChild(h2);
+        const grid = document.createElement('div'); grid.className = 'sheet-grid';
+
+        groups[l].sort((a,b) => a.id.localeCompare(b.id)).forEach(a => {
+          const card = document.createElement('div');
+          card.className = 'sheet-card';
+          card.id = `card-${a.id}`;
+
+          const hdr = document.createElement('header');
+          hdr.innerHTML = `<div><h3>${a.id}</h3><time>${a.time}</time></div><button class='copy-coords'>📋</button>`;
+          hdr.querySelector('.copy-coords').onclick = () => navigator.clipboard.writeText(`${a.lat}, ${a.lon}`);
+          card.appendChild(hdr);
+
+          const img = document.createElement('img'); img.src = a.main; img.className = 'sheet-main'; card.appendChild(img);
+
+          const tbl = document.createElement('table'); tbl.className = 'sheet-meta';
+          tbl.innerHTML = `<tr><th>Latitude</th><td>${a.lat}</td></tr><tr><th>Longitude</th><td>${a.lon}</td></tr>`;
+          card.appendChild(tbl);
+
+          if (a.variations.length) {
+            const strip = document.createElement('div'); strip.className = 'sheet-carousel';
+            a.variations.forEach(url => {
+              const thumb = document.createElement('img'); thumb.src = url; thumb.title = url.split('/').pop();
+              thumb.onmouseenter = () => {
+                if (currentOverlay) map.removeLayer(currentOverlay);
+                currentOverlay = L.imageOverlay(url, map.getBounds()).addTo(map);
+                let raw=url.split('/').pop().replace(/\.[^/.]+$/,'');
+                let part=raw.includes('-')?raw.substring(raw.lastIndexOf('-')+1):raw;
+                const fname=part.replace(/_/g,' ');
+                nameControl.update(fname);
+              };
+              thumb.onmouseleave = () => {
+                if (currentOverlay) map.removeLayer(currentOverlay);
+                currentOverlay = null;
+                nameControl.update('');
+              };
+              thumb.onclick = () => window.open(url, '_blank');
+              strip.appendChild(thumb);
+            });
+            card.appendChild(strip);
+          }
+
+          card.onmouseenter = () => { const z = zoomOverrides[a.id] || 18; map.flyTo([a.lat,a.lon], z, { duration: 0.8 }); markerMap[a.id].openPopup(); };
+          card.onmouseleave = () => markerMap[a.id].closePopup();
+
+          grid.appendChild(card);
+        });
+
+        g.appendChild(grid);
+        cat.appendChild(g);
+      });
+
+      document.getElementById('filter').addEventListener('input', e => { const t = e.target.value.toLowerCase(); buildCatalogue(list.filter(a => a.id.toLowerCase().includes(t) || a.time.toLowerCase().includes(t))); });
+    }
+  </script>
+</body>
+<footer style="
+position: fixed;
+bottom: 0;
+left: 0;
+width: 100%;
+background: black;
+color: #777;
+font-size: 0.75rem;
+text-align: center;
+padding: 0.4rem 0 0.3rem;
+border-top: 1px solid #222;
+z-index: 1000;
+">
+<nav style="margin-bottom: 0.2rem;">
+  <a href="index.html" style="margin: 0 0.8rem; color: #55ddff; text-decoration: none;">Main</a>
+  <a href="globe.html" style="margin: 0 0.8rem; color: #55ddff; text-decoration: none;">Globe</a>
+  <a href="catalogue.html" style="margin: 0 0.8rem; color: #55ddff; text-decoration: none;">Map</a>
+  <a href="paper.html" style="margin: 0 0.8rem; color: #55ddff; text-decoration: none;">Catalogue</a>
+</nav>
+<div style="opacity: 0.5;">© 2025 hua xi zi & patrick o’shea — SCA‑1 Project</div>
+</footer>
+</html>

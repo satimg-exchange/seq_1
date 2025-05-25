@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cartographic Catalogue</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  <style>
+:root {
+  --bg: #f9f9f9;
+  --paper-bg: #ffffff;
+  --text: #1f1f1f;
+  --heading: #002c5f;
+  --accent: #00509e;
+  --border: #dcdcdc;
+  --radius: 0.75rem;
+  --shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  --font-serif: 'Georgia', 'Palatino Linotype', 'Times New Roman', serif;
+}
+
+/* === Global Reset === */
+html {
+  box-sizing: border-box;
+}
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* === Typography & Layout === */
+body {
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  max-width: 1400px;
+  font-family: var(--font-serif);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 1.05rem;
+}
+
+h1 {
+  text-align: center;
+  color: var(--heading);
+  font-size: 2.5rem;
+  margin-bottom: 2.5rem;
+}
+
+/* === Controls === */
+#controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+#searchBar {
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-width: 240px;
+  font-family: inherit;
+}
+
+/* === Grid Layout === */
+#paper-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+}
+
+/* === Paper Card === */
+.paper-card {
+  background: var(--paper-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease;
+}
+
+.paper-card:hover {
+  transform: translateY(-2px);
+}
+
+/* === Header === */
+.paper-card header {
+  background: #f3f3f3;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.paper-card header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: var(--accent);
+}
+
+.meta {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+/* === Map Section === */
+.map-container {
+  width: 100%;
+  height: 320px;
+}
+
+/* === Content Section === */
+.content {
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* === Main Image === */
+figure {
+  margin: 0;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* === Section Labels (variations / original) === */
+.section-label {
+  display: inline-block;
+  font-weight: bold;
+  color: var(--accent);
+  font-size: 0.95rem;
+  margin: 1rem 0 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* === Variations === */
+.variations {
+  padding: 0 1.25rem 1rem;
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+}
+
+.variations img {
+  height: 60px;
+  width: 100%;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  object-fit: cover;
+  background: #fff;
+  transition: transform 0.2s ease;
+}
+
+.variations img:hover {
+  transform: scale(1.05);
+}
+
+.variations img.active {
+  outline: 3px solid var(--accent);
+}
+
+/* === Screen Reader Only === */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* === Print Styles === */
+@media print {
+  body {
+    max-width: 100%;
+    padding: 0;
+  }
+  #controls {
+    display: none;
+  }
+  .paper-card {
+    break-inside: avoid;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <h1>Cartographic Catalogue</h1>
+
+  <div id="controls">
+    <label for="searchBar" class="sr-only">Search by ID</label>
+    <input type="text" id="searchBar" placeholder="Filter by ID…" />
+  </div>
+
+  <section id="paper-grid" aria-live="polite"></section>
+
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <script>
+    const assetData = [
+      ['C1', 34.2655, 108.8955, '2025‑01‑30 17:31 GMT+8'],
+      ['C2', 31.3896, 121.5225, '2024‑12‑19 14:24 GMT+8'],
+      ['C4', 13.743853, 100.589287, '2024‑11‑13 09:41 GMT+7'],
+      ['C10', 22.855908, 106.724137, '2024‑08‑23 12:39 GMT+8'],
+      ['C12', 31.272038, 121.555763, '2024‑08‑03 18:08 GMT+8'],
+      ['C14', 31.192763, 121.299422, '2024‑04‑13 20:56 GMT+8'],
+      ['C17', 34.302837, 117.290383, '2024‑02‑15 12:09 GMT+8'],
+      ['C18', 34.232463, 109.122156, '2024‑02‑13 15:21 GMT+8'],
+      ['C19', 22.282508, 114.191162, '2024‑01‑30 10:20 GMT+8'],
+      ['C24', 18.799705, 98.939112, '2024‑01‑05 17:45 GMT+7'],
+      ['C27', 20.350608, 100.082856, '2024‑01‑03 15:47 GMT+7'],
+      ['C28', 19.912762, 99.824487, '2024‑01‑02 17:25 GMT+7'],
+      ['C30', 18.796292, 98.982978, '2024‑01‑01 17:19 GMT+7'],
+      ['P2', 44.91871399, -73.12477538, '2024‑07‑27 22:23'],
+      ['P4', 44.97115405, -72.89641591, '2024‑08‑25 18:04'],
+      ['P7', 13.75, 100.49, '2024‑02‑02 12:00'],
+      ['P8', 46.81339133, -71.20143859, '2024‑10‑20 14:31'],
+      ['P10', 49.28, -123.105, '2024‑11‑02 16:30'],
+      ['P11', 45.54008078, -73.5878241, '2025‑01‑12 10:00']
+    ];
+
+    const mapInstances = {};
+    const overlayInstances = {};
+
+    // Load manifest to map asset folders to files
+    fetch('assets/manifest.json')
+      .then(res => res.ok ? res.json() : Promise.reject(res.status))
+      .then(files => {
+        const grouped = files.reduce((acc, path) => {
+          const p = path.split('/');
+          const folder = p[1];
+          const file = p.slice(2).join('/');
+          (acc[folder] = acc[folder] || []).push(file);
+          return acc;
+        }, {});
+
+        const assets = assetData.map(([id, lat, lon, time]) => {
+          const key = id.toLowerCase();
+          const all = grouped[key] || [];
+          const mainFile = `${key}.png`;
+          const vars = all.filter(f => f !== mainFile && !f.startsWith(key + '-map'));
+          return {
+            id,
+            lat,
+            lon,
+            time,
+            main: `assets/${key}/${mainFile}`,
+            variations: vars.map(v => `assets/${key}/${v}`)
+          };
+        });
+
+        renderGrid(assets);
+        initMaps(assets);
+      })
+      .catch(console.error);
+
+    /**
+     * Render all cards into the grid
+     */
+    function renderGrid(assets) {
+      const grid = document.getElementById('paper-grid');
+      grid.innerHTML = '';
+
+      assets.forEach(a => {
+        const card = document.createElement('article');
+        card.className = 'paper-card';
+        card.dataset.id = a.id;
+
+        card.innerHTML = `
+          <header>
+            <h2>${a.id}</h2>
+            <p class="meta"><strong>Coordinates:</strong> ${a.lat.toFixed(6)}, ${a.lon.toFixed(6)}<br><strong>Recorded:</strong> ${a.time}</p>
+          </header>
+
+          <div id="map-${a.id}" class="map-container" role="img" aria-label="Map for ${a.id}"></div>
+            <br><p class="section-label">Variations</p><div class="variations">
+            ${a.variations.map(v => `<img src="${v}" alt="Variation for ${a.id}" data-parent="${a.id}" data-url="${v}" loading="lazy" />`).join('')}
+            </div>
+
+          <div class="content">
+            <p class="section-label">Original</p>
+            <figure>
+              <img src="${a.main}" alt="Primary render of ${a.id}" loading="lazy" />
+            </figure>
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+
+      attachVariationEvents();
+    }
+
+    /**
+     * Attach click listeners to variation thumbnails to toggle overlays
+     */
+    function attachVariationEvents() {
+      document.querySelectorAll('.variations img').forEach(img => {
+        img.addEventListener('click', () => {
+          const id = img.getAttribute('data-parent');
+          const url = img.getAttribute('data-url');
+          const map = mapInstances[id];
+
+          // Remove existing overlay if present
+          const existing = overlayInstances[id];
+          if (existing) {
+            map.removeLayer(existing);
+            document.querySelector(`[data-parent="${id}"].active`)?.classList.remove('active');
+            delete overlayInstances[id];
+          }
+
+          // Add new overlay if it wasn't the one just removed
+          if (!existing || existing._url !== url) {
+            overlayInstances[id] = L.imageOverlay(url, map.getBounds()).addTo(map);
+            img.classList.add('active');
+          }
+        });
+      });
+    }
+
+    /**
+     * Initialize all Leaflet maps (static, non‑interactive)
+     */
+    function initMaps(assets) {
+      const opts = {
+        dragging: false,
+        touchZoom: false,
+        doubleClickZoom: false,
+        scrollWheelZoom: false,
+        boxZoom: false,
+        keyboard: false,
+        zoomControl: false
+      };
+
+      assets.forEach(a => {
+        const zoom = (a.id === 'C17') ? 15 : 16;
+        const map = L.map(`map-${a.id}`, opts).setView([a.lat, a.lon], zoom);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap'
+        }).addTo(map);
+        L.marker([a.lat, a.lon]).addTo(map);
+        mapInstances[a.id] = map;
+      });
+    }
+
+    // Simple search / filter by ID
+    document.getElementById('searchBar').addEventListener('input', e => {
+      const q = e.target.value.trim().toLowerCase();
+      document.querySelectorAll('.paper-card').forEach(card => {
+        const show = card.dataset.id.toLowerCase().includes(q);
+        card.style.display = show ? 'flex' : 'none';
+      });
+    });
+  </script>
+</body>
+<footer style="
+position: fixed;
+bottom: 0;
+left: 0;
+width: 100%;
+background: black;
+color: #777;
+font-size: 0.75rem;
+text-align: center;
+padding: 0.4rem 0 0.3rem;
+border-top: 1px solid #222;
+z-index: 1000;
+">
+<nav style="margin-bottom: 0.2rem;">
+    <a href="index.html" style="margin: 0 0.8rem; color: #55ddff; text-decoration: none;">Main</a>
+    <a href="globe.html" style="margin: 0 0.8rem; color: #55ddff; text-decoration: none;">Globe</a>
+    <a href="catalogue.html" style="margin: 0 0.8rem; color: #55ddff; text-decoration: none;">Map</a>
+    <a href="paper.html" style="margin: 0 0.8rem; color: #55ddff; text-decoration: none;">Catalogue</a>
+</nav>
+<div style="opacity: 0.5;">© 2025 hua xi zi & patrick o’shea — SCA‑1 Project</div>
+</footer>
+</html>

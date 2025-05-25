@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Satellite Triangulation Visualization</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/satellite.js/dist/satellite.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.110.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.110.0/examples/js/loaders/DRACOLoader.js"></script>
+
+  <script type="module">
+    import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/controls/OrbitControls.js";
+
+    const EARTH_RADIUS = 6371;
+    const SCALE_FACTOR = 0.01;
+    const SCALE_FACTOR_Z = 0.015;
+
+    const TLE_API_URL = 'https://tle.ivanstanojevic.me/api/tle/58924';
+
+    const localAssets = [
+      ['C1', 34.2655, 108.8955, '2025-01-30T09:31:00Z'],
+      ['C2', 31.3896, 121.5225, '2024-12-19T06:24:00Z'],
+      ['C4', 13.743853, 100.589287, '2024-11-13T02:41:00Z'],
+      ['C10', 22.855908, 106.724137, '2024-08-23T04:39:00Z'],
+      ['C12', 31.272038, 121.555763, '2024-08-03T10:08:00Z'],
+      ['C14', 31.192763, 121.299422, '2024-04-13T12:56:00Z'],
+      ['C17', 34.302837, 117.290383, '2024-02-15T04:09:00Z'],
+      ['C18', 34.232463, 109.122156, '2024-02-13T07:21:00Z'],
+      ['C19', 22.282508, 114.191162, '2024-01-30T02:20:00Z'],
+      ['C24', 18.799705, 98.939112, '2024-01-05T10:45:00Z'],
+      ['C27', 20.350608, 100.082856, '2024-01-03T08:47:00Z'],
+      ['C28', 19.912762, 99.824487, '2024-01-02T10:25:00Z'],
+      ['C30', 18.796292, 98.982978, '2024-01-01T09:19:00Z'],
+      ['P2', 44.91871399, -73.12477538, '07/27/24 10:23 PM'],
+      ['P4', 44.97115405, -72.89641591, '08/25/2024 6:04 PM'],
+      ['P7', 13.75, 100.49, '02/02/24 12:00 PM'],
+      ['P8', 46.813, -71.2, '10/20/2024 2:31 PM'],
+      ['P10', 49.28, -123.105, '11/02/2024 4:30 PM'],
+      ['P11', 45.54, -73.58, '01/12/25 10:00 AM'],
+    ];
+
+    function degreesToRadians(deg) {
+      return (deg * Math.PI) / 180;
+    }
+
+    function convertLatLongTo3D(lat, lon, scale = SCALE_FACTOR) {
+      const phi = degreesToRadians(90 - lat);
+      const theta = degreesToRadians(-lon);
+      return {
+        x: EARTH_RADIUS * Math.sin(phi) * Math.cos(theta) * scale,
+        y: EARTH_RADIUS * Math.cos(phi) * scale,
+        z: EARTH_RADIUS * Math.sin(phi) * Math.sin(theta) * scale,
+      };
+    }
+
+    const precomputedECI = {};
+
+    let eciCache = null;
+
+async function loadECICache() {
+  if (!eciCache) {
+    const res = await fetch('eci-cache.json');
+    eciCache = await res.json();
+  }
+}
+
+async function fetchSatelliteECIForTime(time, id) {
+  await loadECICache();
+  const cached = eciCache[id];
+  if (!cached) throw new Error(`ECI not found for ${id}`);
+  return cached;
+}
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const clickableObjects = [];
+const trianglesByObjectId = new Map();
+let highlightedTriangle = null;
+
+
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 10000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const sceneGroup = new THREE.Group();
+    scene.add(sceneGroup);
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+light.position.set(10, 10, 10);
+scene.add(light);
+
+// Optional: add ambient light too
+const ambient = new THREE.AmbientLight(0x888888);
+scene.add(ambient);
+light.castShadow = true;
+renderer.shadowMap.enabled = true;
+
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
+
+    camera.position.z = EARTH_RADIUS * 5 * SCALE_FACTOR;
+
+    const textureLoader = new THREE.TextureLoader();
+const earthTexture = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/land_ocean_ice_cloud_2048.jpg');
+const nightTexture = textureLoader.load(
+  'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_lights_2048.png'
+);
+const specularMap = textureLoader.load(
+  'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_specular_2048.jpg'
+);
+const atmosphereTexture = textureLoader.load(
+  'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg'
+);
+const cloudTexture = textureLoader.load(
+  'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_clouds_1024.png'
+);
+const coolearthTexture = textureLoader.load(
+  'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_bump_roughness_clouds_4096.jpg'
+);
+
+
+const earthMat = new THREE.MeshStandardMaterial({
+  map: coolearthTexture,           // base day texture
+  bumpMap: specularMap,            // use this as fake elevation
+  bumpScale: 0.05,
+  metalness: 0.4,
+  roughness: 0.9,
+  transparent: true,
+  opacity: 0.97
+});
+
+
+const earthGeo = new THREE.SphereGeometry(EARTH_RADIUS * SCALE_FACTOR, 64, 64);
+const earth = new THREE.Mesh(earthGeo, earthMat);
+sceneGroup.add(earth);
+const cloudGeo = new THREE.SphereGeometry(EARTH_RADIUS * SCALE_FACTOR * 1.01, 64, 64);
+const cloudMat = new THREE.MeshLambertMaterial({
+  map: cloudTexture,
+  transparent: true,
+  opacity: 0.84,
+  depthWrite: true,
+});
+const cloudMesh = new THREE.Mesh(cloudGeo, cloudMat);
+cloudMesh.renderOrder = 1;
+sceneGroup.add(cloudMesh);
+
+cloudMesh.rotation.y += 1;
+
+
+function addPoint(pos, color = 0xff0000) {
+  const geo = new THREE.SphereGeometry(50 * SCALE_FACTOR, 16, 16);
+  const mat = new THREE.MeshBasicMaterial({ color });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(pos.x, pos.y, pos.z);
+  sceneGroup.add(mesh);
+  clickableObjects.push(mesh);
+  return mesh; // ← important!
+}
+
+
+
+    async function addImagePlane(pos, url) {
+  const loader = new THREE.TextureLoader();
+  const texture = await new Promise((resolve, reject) => {
+    loader.load(url, resolve, undefined, reject);
+  });
+  texture.minFilter = THREE.LinearFilter;
+  texture.generateMipmaps = false;
+
+  const geo = new THREE.PlaneGeometry(700 * SCALE_FACTOR, 1000 * SCALE_FACTOR);
+  const mat = new THREE.MeshBasicMaterial({ 
+    map: texture, 
+    side: THREE.DoubleSide, 
+    transparent: true,
+    depthWrite: false,   // don't write to depth buffer
+    depthTest: false      // still respect occlusion
+  });
+  const plane = new THREE.Mesh(geo, mat);
+  plane.position.set(pos.x, pos.y, pos.z);
+  plane.lookAt(camera.position);
+  plane.renderOrder = 1; // render after globe
+  sceneGroup.add(plane);
+}
+
+
+function addLine(start, end, color = 0xffffff) {
+  const geo = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(start.x, start.y, start.z),
+    new THREE.Vector3(end.x, end.y, end.z),
+  ]);
+  const mat = new THREE.LineBasicMaterial({ 
+    color, 
+    transparent: true, 
+    opacity: .30,
+    depthWrite: false,   // don't write to depth buffer
+    depthTest: false      // still respect occlusion
+  });
+  const line = new THREE.Line(geo, mat);
+  line.renderOrder = 2;
+  sceneGroup.add(line);
+}
+
+
+function addTriangle(a, b, c, color = 0xffffff) {
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute([
+    a.x, a.y, a.z,
+    b.x, b.y, b.z,
+    c.x, c.y, c.z,
+  ], 3));
+
+  const mat = new THREE.MeshBasicMaterial({
+    color,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.1,
+    depthWrite: false,
+    depthTest: false,
+  });
+
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.renderOrder = 22;
+  sceneGroup.add(mesh);
+  return mesh; // 🟢 Return the triangle
+}
+
+    function createTextLabel(text) {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 256;
+      canvas.height = 64;
+      ctx.fillStyle = 'white';
+      ctx.font = '20px Arial';
+      ctx.fillText(text, 10, 40);
+      const texture = new THREE.CanvasTexture(canvas);
+      const spriteMat = new THREE.SpriteMaterial({ map: texture });
+      const sprite = new THREE.Sprite(spriteMat);
+      sprite.scale.set(300 * SCALE_FACTOR, 75 * SCALE_FACTOR, 1);
+      return sprite;
+    }
+    let satelliteModel = null;
+
+// Setup DRACOLoader
+const dracoLoader = new THREE.DRACOLoader();
+dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.110.0/examples/js/libs/draco/'); // path to decoder files
+
+const gltfLoader = new THREE.GLTFLoader();
+gltfLoader.setDRACOLoader(dracoLoader);
+
+// Load the SAC-C satellite model
+gltfLoader.load('SAC-C.glb', gltf => {
+  satelliteModel = gltf.scene;
+  satelliteModel.scale.set(0.3, 0.3, 0.3); // adjust as needed
+}, undefined, error => {
+  console.error('Failed to load satellite model:', error);
+});
+
+
+    async function plotAssetsWithSatellite() {
+      let previousUser = null;
+      for (const [id, lat, lon, time] of localAssets) {
+        const userECI = convertLatLongTo3D(lat, lon);
+        const imageUrl = `assets/${id.toUpperCase()}/${id.toLowerCase()}.png`;
+        try {
+            const satelliteECI = await fetchSatelliteECIForTime(time, id);
+           // addPoint(userECI, 0xff0000);
+           const userPoint = addPoint(userECI, 0xff0000);
+
+let satelliteMesh;
+if (satelliteModel) {
+  satelliteMesh = satelliteModel.clone();
+  satelliteMesh.traverse(obj => {
+    if (obj.isMesh) {
+    //  obj.material = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
+      obj.castShadow = true;
+      obj.receiveShadow = true;
+      clickableObjects.push(obj); // click detection per mesh
+    }
+  });
+  satelliteMesh.position.set(satelliteECI.x, satelliteECI.y, satelliteECI.z);
+  sceneGroup.add(satelliteMesh);
+} else {
+  satelliteMesh = addPoint(satelliteECI, 0x00ffff);
+}
+
+await addImagePlane(userECI, imageUrl);
+
+const label = createTextLabel(time);
+label.position.set(userECI.x, userECI.y + 0.3, userECI.z);
+sceneGroup.add(label);
+
+if (previousUser) {
+    const triangle = addTriangle(previousUser, userECI, satelliteECI, 0xffffff);
+
+if (triangle) {
+  trianglesByObjectId.set(userPoint.uuid, triangle);
+  satelliteMesh.traverse(obj => {
+    if (obj.isMesh) {
+      trianglesByObjectId.set(obj.uuid, triangle);
+    }
+  });
+}
+
+
+  addLine(previousUser, userECI, 0xff0000);
+  addLine(userECI, satelliteECI, 0xffffff);
+  addLine(previousUser, satelliteECI, 0x00ffff);
+}
+
+previousUser = userECI;
+        } catch (err) {
+          console.warn(`Skipped ${id} due to error:`, err);
+        }
+      }
+    }
+    function saveECIDataToFile() {
+  const blob = new Blob([JSON.stringify(precomputedECI, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'eci-cache.json';
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+    async function loadGeoJSON(url) {
+      const res = await fetch(url);
+      return res.json();
+    }
+
+    function convertGeoJSONTo3D(coords) {
+      return coords.map(([lon, lat]) => convertLatLongTo3D(lat, lon));
+    }
+
+    async function drawBoundaries(urls) {
+  for (const url of urls) {
+    try {
+      const geojson = await loadGeoJSON(url);
+      geojson.features.forEach(feature => {
+        const group = new THREE.Group();
+        const { type, coordinates } = feature.geometry;
+
+        const material = new THREE.LineBasicMaterial({
+          color: 0x8888ff,
+          transparent: true,
+          opacity: 0.3,
+          depthWrite: false,
+          depthTest: false
+        });
+
+        const addLine = (pointsArray, isLoop = false) => {
+          const points = convertGeoJSONTo3D(pointsArray);
+          const geometry = new THREE.BufferGeometry().setFromPoints(points);
+          const line = isLoop
+            ? new THREE.LineLoop(geometry, material)
+            : new THREE.Line(geometry, material);
+          line.renderOrder = 999; // Force-on-top
+          group.add(line);
+        };
+
+        if (type === 'LineString') {
+          addLine(coordinates);
+        } else if (type === 'MultiLineString') {
+          coordinates.forEach(line => addLine(line));
+        } else if (type === 'Polygon') {
+          coordinates.forEach(polygon => addLine(polygon, true));
+        }
+
+        sceneGroup.add(group);
+      });
+    } catch (e) {
+      console.warn('GeoJSON load error:', url, e);
+    }
+  }
+}
+
+
+plotAssetsWithSatellite();
+drawBoundaries(['cable-geo.json']);
+//  saveECIDataToFile(); // Now this runs AFTER all assets are processed
+
+
+
+    function animate() {
+      requestAnimationFrame(animate);
+      sceneGroup.rotation.y += 0.0005;
+      sceneGroup.rotation.z += 0.0001;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+
+    window.addEventListener('click', onClick, false);
+
+    function onClick(event) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(clickableObjects);
+
+  if (intersects.length > 0) {
+    const clicked = intersects[0].object;
+    console.log('Clicked object UUID:', clicked.uuid);
+
+    // Reset old highlight
+    if (highlightedTriangle) {
+      highlightedTriangle.material.color.set(0xffffff);
+      highlightedTriangle.material.opacity = 0.1;
+    }
+
+    const triangle = trianglesByObjectId.get(clicked.uuid);
+    if (triangle) {
+      triangle.material.color.set(0xffff00);
+      triangle.material.opacity = 0.6;
+      highlightedTriangle = triangle;
+    } else {
+      console.log('No triangle associated with this object.');
+    }
+  }
+}
+
+
+  </script>
+
+</body>
+<footer style="
+position: fixed;
+bottom: 0;
+left: 0;
+width: 100%;
+background: black;
+color: #777;
+font-size: 0.75rem;
+text-align: center;
+padding: 0.4rem 0 0.3rem;
+border-top: 1px solid #222;
+z-index: 1000;
+">
+<nav style="margin-bottom: 0.2rem;">
+    <a href="index.html" style="margin: 0 0.8rem; color: #55ddff; text-decoration: none;">Main</a>
+    <a href="globe.html" style="margin: 0 0.8rem; color: #55ddff; text-decoration: none;">Globe</a>
+    <a href="catalogue.html" style="margin: 0 0.8rem; color: #55ddff; text-decoration: none;">Map</a>
+    <a href="paper.html" style="margin: 0 0.8rem; color: #55ddff; text-decoration: none;">Catalogue</a>
+</nav>
+<div style="opacity: 0.5;">© 2025 hua xi zi & patrick o’shea — SCA‑1 Project</div>
+</footer>
+</html>
