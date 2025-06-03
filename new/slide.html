@@ -1,373 +1,264 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
-  <title>Cartographic Slideshow</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Offset-Style Gallery</title>
   <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      background: #070b11;
-      color: #e3e7ee;
-      font-family: 'JetBrains Mono', 'Menlo', 'Fira Mono', monospace;
-      overflow: hidden;
+    @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,700;1,400&display=swap');
+
+    /* Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
     }
+
     body {
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(ellipse at 50% 30%, #15181d 80%, #090a10 100%);
+      margin: 0;
+      background-color: #111;
+      color: #eee;
+      font-family: 'EB Garamond', serif;
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 60px 20px 120px;
+      line-height: 1.4;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
-    #slideshow {
-      width: 100vw;
-      height: 100vh;
-      position: absolute;
-      top: 0; left: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1;
-      background: rgba(10,12,15,0.90);
-      /* Glitch background grain */
-      background-image: repeating-linear-gradient(180deg, transparent, rgba(18,21,30,0.19) 2px, transparent 6px);
-      box-shadow: 0 0 90px 10px #00e5ff14 inset, 0 0 44px 12px #232e4017;
-    }
-    .slide-container {
-      position: relative;
-      width: 60vw;
-      min-width: 420px;
-      max-width: 1020px;
-      aspect-ratio: 5 / 3.6;
-      background: #161821;
-      border-radius: 1.8rem;
-      box-shadow: 0 0 44px 6px #0efad966, 0 1px 60px #04101f88 inset;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transition: box-shadow 0.6s cubic-bezier(.9,0,.27,1);
-      animation: glowIn 1.2s cubic-bezier(.8,0,.2,1);
-    }
-    @keyframes glowIn {
-      0% { box-shadow: 0 0 0 0 #0000, 0 0 0 #0000; opacity: 0; transform: scale(1.12);}
-      75% { opacity: 1; transform: scale(1);}
-      100% { box-shadow: 0 0 44px 6px #0efad966, 0 1px 60px #04101f88 inset; opacity: 1;}
-    }
-    .slide-map, .slide-img {
-      position: absolute;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      opacity: 0;
-      transition: opacity 1.5s cubic-bezier(.9,0,.27,1);
-      border-radius: 1.8rem;
-      z-index: 2;
-    }
-    .slide-img.active, .slide-map.active { opacity: 1; z-index: 4; }
-    .slide-img {
-      background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      pointer-events: none;
-    }
-    .slide-img img {
-      max-width: 98%; max-height: 98%;
-      border-radius: 1.3rem;
-      box-shadow: 0 0 40px #00ffe48f;
-      filter: brightness(1.04) contrast(1.05) saturate(1.07) drop-shadow(0 0 18px #09c7e69a);
-      animation: imgPulse 3s ease-in-out infinite alternate;
-    }
-    @keyframes imgPulse {
-      0% { filter: brightness(1.02) contrast(1.02) drop-shadow(0 0 7px #0efad955);}
-      100% { filter: brightness(1.06) contrast(1.07) drop-shadow(0 0 16px #0efad955);}
-    }
-    .slide-map {
-      z-index: 5;
-      /* Animation effect for map */
-      mix-blend-mode: lighten;
-      pointer-events: none;
-    }
-    /* Overlay a thin animated border */
-    .slide-container:after {
-      content: '';
-      position: absolute; left: 0; top: 0; right: 0; bottom: 0;
-      pointer-events: none;
-      border-radius: 1.8rem;
-      border: 2px solid #27f9ffcc;
-      box-shadow: 0 0 36px 6px #0efad944, 0 0 0 2px #09d3e54d inset;
-      opacity: 0.32;
-      animation: borderGlow 2.6s linear infinite alternate;
-      z-index: 10;
-    }
-    @keyframes borderGlow {
-      0% { box-shadow: 0 0 36px 6px #0efad944, 0 0 0 2px #09d3e54d inset; }
-      100% { box-shadow: 0 0 60px 10px #0efad988, 0 0 0 4px #0cfed1cc inset; }
-    }
-    .slide-meta {
-      position: absolute; bottom: 0.8rem; left: 2.1rem;
-      z-index: 12;
-      font-size: 1.05rem;
-      font-family: inherit;
-      color: #b6e8ff;
-      text-shadow: 0 0 12px #00161e, 0 0 2px #0efad9;
-      letter-spacing: 0.03em;
-      user-select: text;
-      opacity: 0.98;
-      pointer-events: none;
-    }
-    .slide-title {
-      position: absolute; top: 1.1rem; left: 2.1rem;
-      font-size: 2.25rem;
-      font-weight: bold;
-      font-family: inherit;
-      letter-spacing: 0.03em;
-      color: #0efad9;
-      text-shadow: 0 0 24px #00324099;
-      z-index: 15;
-      opacity: 0.97;
-      pointer-events: none;
-      filter: blur(0.2px);
-      /* Small glitch effect */
-      animation: glitchTitle 1.4s infinite steps(2, jump-none) alternate;
-    }
-    @keyframes glitchTitle {
-      0% { text-shadow: 2px 0 #0efad955, -1px 0 #095e8b, 0 0 14px #0efad9; }
-      90% { text-shadow: 2px 0 #0efad955, -1px 0 #095e8b, 0 0 14px #0efad9; }
-      92% { text-shadow: 2px 2px #00ffe4aa, -2px -2px #00131c, 0 0 22px #00ffd2;}
-      100% { text-shadow: 2px 2px #00ffe4aa, -2px -2px #00131c, 0 0 22px #00ffd2;}
-    }
-    /* Progress dots */
-    .slide-dots {
-      position: absolute; bottom: 1.2rem; right: 2.4rem;
-      display: flex; gap: 0.6rem;
-      z-index: 30;
-      opacity: 0.73;
-      pointer-events: none;
-    }
-    .dot {
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      background: linear-gradient(145deg,#0efad9 70%,#b6e8ff 100%);
-      box-shadow: 0 0 9px #00ffe2a5;
-      opacity: 0.22;
-      transition: opacity 0.35s cubic-bezier(.95,0,.27,1), transform 0.6s cubic-bezier(.9,0,.27,1);
-      border: 2px solid #0efad9a1;
-      margin: 0 2px;
-      filter: blur(0.4px);
-      will-change: opacity, transform;
-    }
-    .dot.active {
-      opacity: 0.93;
-      transform: scale(1.22);
-      background: linear-gradient(135deg,#e3e7ee 20%,#0efad9 95%);
-      box-shadow: 0 0 24px #0efad999, 0 0 2px #001820cc;
-      border-color: #00ffc8;
-    }
-    /* Footer */
-    #footer {
-      position: fixed; left: 0; right: 0; bottom: 0;
-      color: #a8c8d8;
-      background: #070b11cc;
-      border-top: 1.2px solid #082c35;
+
+    h1 {
+      font-weight: 700;
+      font-size: 3rem;
+      letter-spacing: 0.15em;
       text-align: center;
-      font-size: 0.9rem;
-      padding: 0.4rem 0 0.3rem;
-      z-index: 4000;
-      letter-spacing: 0.01em;
-      opacity: 0.81;
-      box-shadow: 0 2px 30px #00395a18;
-      font-family: 'JetBrains Mono', 'Menlo', monospace;
+      margin-bottom: 80px;
+      color: #eee;
+      user-select: text;
+      cursor: default;
+    }
+
+    section.folder {
+      margin-bottom: 160px;
+      cursor: pointer;
+    }
+    section.folder:last-child {
+      margin-bottom: 60px;
+    }
+
+    h2 {
+      font-weight: 400;
+      font-size: 1.3rem;
+      letter-spacing: 0.15em;
+      margin-bottom: 28px;
+      color: #bbb;
+      text-transform: uppercase;
+      font-variant: small-caps;
+      user-select: text;
+      cursor: default;
+    }
+
+    /* Main image container */
+    .main-image-container {
+      position: relative;
+      width: 100%;
+      max-height: 650px;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      border-radius: 14px;
+      box-shadow:
+        0 0 25px rgba(255 255 255 / 0.06),
+        inset 0 0 100px rgba(255 255 255 / 0.1);
+      transition: box-shadow 0.4s ease;
+    }
+    section.folder:hover .main-image-container {
+      box-shadow:
+        0 0 45px rgba(255 255 255 / 0.1),
+        inset 0 0 120px rgba(255 255 255 / 0.2);
+    }
+
+    .main-image-container img.main-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 14px;
+      display: block;
+      opacity: 1;
+      transition: opacity 0.5s ease;
       user-select: none;
       pointer-events: none;
     }
-    @media (max-width: 900px) {
-      .slide-container { width: 99vw; min-width: 0; max-width: 100vw; }
-      .slide-title, .slide-meta { left: 1.2rem; }
-      .slide-dots { right: 1.0rem; }
+
+    /* PiP original photo */
+    .pip-photo {
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      border-radius: 16px;
+      object-fit: cover;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 3px solid #111;
+      box-shadow: 0 6px 18px rgba(0 0 0 / 0.7);
+      pointer-events: none;
+      user-select: none;
+      mix-blend-mode: normal;
+      background: #111;
+      transition: box-shadow 0.3s ease;
+      will-change: transform;
+    }
+    section.folder:hover .pip-photo {
+      box-shadow: 0 10px 40px rgba(0 0 0 / 0.85);
+    }
+    @media (max-width: 640px) {
+      .pip-photo {
+        width: 110px;
+        height: 110px;
+      }
+    }
+
+    /* Label below main image */
+    .image-label {
+      font-size: 1rem;
+      color: #666;
+      font-style: italic;
+      letter-spacing: 0.1em;
+      margin-top: 14px;
+      user-select: none;
+      text-align: center;
+      min-height: 1.5em;
+      font-variant: small-caps;
+      font-weight: 400;
+      font-family: 'EB Garamond', serif;
     }
   </style>
 </head>
 <body>
-  <div id="slideshow">
-    <div class="slide-container" id="slideContainer" style="display:none;">
-      <div class="slide-title" id="slideTitle"></div>
-      <div class="slide-meta" id="slideMeta"></div>
-      <div class="slide-img" id="slideImg"></div>
-      <div class="slide-map" id="slideMap"></div>
-      <div class="slide-dots" id="slideDots"></div>
-    </div>
-  </div>
-  <div id="footer">
-    Cartographic Catalogue – Animated Slideshow (2025) &nbsp; • &nbsp; <span style="color:#0efad9">SCA-1</span>
-  </div>
-  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+  <h1>IMAGE GALLERY</h1>
+  <div id="gallery">Loading...</div>
+
   <script>
-    // Use your assetData from the original script
-    const assetData = [
-      ['C1', 34.2655, 108.8955, '2025‑01‑30 17:31 GMT+8'],
-      ['C2', 31.3896, 121.5225, '2024‑12‑19 14:24 GMT+8'],
-      ['C4', 13.743853, 100.589287, '2024‑11‑13 09:41 GMT+7'],
-      ['C10', 22.855908, 106.724137, '2024‑08‑23 12:39 GMT+8'],
-      ['C12', 31.272038, 121.555763, '2024‑08‑03 18:08 GMT+8'],
-      ['C14', 31.192763, 121.299422, '2024‑04‑13 20:56 GMT+8'],
-      ['C17', 34.302837, 117.290383, '2024‑02‑15 12:09 GMT+8'],
-      ['C18', 34.232463, 109.122156, '2024‑02‑13 15:21 GMT+8'],
-      ['C19', 22.282508, 114.191162, '2024‑01‑30 10:20 GMT+8'],
-      ['C24', 18.799705, 98.939112, '2024‑01‑05 17:45 GMT+7'],
-      ['C27', 20.350608, 100.082856, '2024‑01‑03 15:47 GMT+7'],
-      ['C28', 19.912762, 99.824487, '2024‑01‑02 17:25 GMT+7'],
-      ['C30', 18.796292, 98.982978, '2024‑01‑01 17:19 GMT+7'],
-      ['P2', 44.91871399, -73.12477538, '2024‑07‑27 22:23'],
-      ['P4', 44.97115405, -72.89641591, '2024‑08‑25 18:04'],
-      ['P7', 13.75, 100.49, '2024‑02‑02 12:00'],
-      ['P8', 46.81339133, -71.20143859, '2024‑10‑20 14:31'],
-      ['P10', 49.28, -123.105, '2024‑11‑02 16:30'],
-      ['P11', 45.54008078, -73.5878241, '2025‑01‑12 10:00']
-    ];
-    // =============== Load manifest and build assets array ==================
-    let assets = [];
-    fetch('assets/manifest.json')
-      .then(res => res.ok ? res.json() : Promise.reject(res.status))
-      .then(files => {
-        const grouped = files.reduce((acc, path) => {
-          const p = path.split('/');
-          const folder = p[1];
-          const file = p.slice(2).join('/');
-          (acc[folder] = acc[folder] || []).push(file);
-          return acc;
-        }, {});
-        assets = assetData.map(([id, lat, lon, time]) => {
-          const key = id.toLowerCase();
-          const all = grouped[key] || [];
-          const mainFile = `${key}.png`;
-          const vars = all.filter(f => f !== mainFile && !f.startsWith(key + '-map'));
-          return {
-            id,
-            lat,
-            lon,
-            time,
-            main: `assets/${key}/${mainFile}`,
-            variations: vars.map(v => `assets/${key}/${v}`)
-          };
-        });
-        startSlideshow();
-      })
-      .catch(console.error);
-
-    // =============== Slideshow Logic ==================
-    let current = 0, timer = null, step = 0;
-    const ANIMATION_STEPS = ['img', 'map']; // show image, then map, then next slide
-    const DURATION = 3500; // ms for each step
-
-    function startSlideshow() {
-      document.getElementById('slideContainer').style.display = 'block';
-      showSlide(current, 0);
-    }
-
-    function showSlide(idx, phase) {
-      const asset = assets[idx];
-      if (!asset) return;
-      // Set meta and title
-      document.getElementById('slideTitle').textContent = asset.id;
-      document.getElementById('slideMeta').innerHTML =
-        `<b>Coordinates:</b> ${asset.lat.toFixed(6)}, ${asset.lon.toFixed(6)}<br>
-         <b>Time:</b> ${asset.time}`;
-      // Show image
-      const slideImg = document.getElementById('slideImg');
-      slideImg.innerHTML = `<img src="${asset.main}" alt="Original render of ${asset.id}" />`;
-      slideImg.classList.remove('active');
-      // Remove/replace any map
-      const slideMap = document.getElementById('slideMap');
-      slideMap.innerHTML = '';
-      slideMap.classList.remove('active');
-      // Draw dots
-      drawDots(idx);
-
-      if (phase === 0) {
-        // Show image only
-        setTimeout(() => { slideImg.classList.add('active'); }, 120);
-        setTimeout(() => { slideMap.classList.remove('active'); }, 100);
-      } else if (phase === 1) {
-        // Show map overlay
-        slideImg.classList.add('active');
-        slideMap.classList.add('active');
-        // Animate in map overlay with leaflet
-        setTimeout(() => showMap(asset), 100);
+    async function loadManifest() {
+      try {
+        const res = await fetch('assets/manifest.json');
+        if (!res.ok) throw new Error('Failed to load manifest.json');
+        return await res.json();
+      } catch (e) {
+        document.getElementById('gallery').textContent = 'Failed to load manifest.';
+        console.error(e);
+        return null;
       }
-
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        // Go to next animation step or next slide
-        if (phase === 0) {
-          showSlide(idx, 1);
-        } else {
-          // Go to next slide, back to img step
-          let next = (idx + 1) % assets.length;
-          showSlide(next, 0);
-        }
-      }, DURATION);
     }
 
-    function showMap(asset) {
-      const mapDiv = document.getElementById('slideMap');
-      mapDiv.innerHTML = ''; // clear before new map
-      const mapId = 'map_' + asset.id + '_' + Math.random().toString(36).slice(2);
-      mapDiv.innerHTML = `<div id="${mapId}" style="width:100%;height:100%;border-radius:1.8rem;overflow:hidden;"></div>`;
-      // Map options: silent, non-interactive
-      const zoom = (asset.id === 'C17') ? 15 : 16;
-      const map = L.map(mapId, {
-        dragging: false,
-        touchZoom: false,
-        doubleClickZoom: false,
-        scrollWheelZoom: false,
-        boxZoom: false,
-        keyboard: false,
-        zoomControl: false,
-        attributionControl: false
-      }).setView([asset.lat, asset.lon], zoom);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-      // Animated marker effect (pulsing circle)
-      const markerIcon = L.divIcon({
-        className: 'custom-marker',
-        html: `<div style="width:36px;height:36px;border-radius:50%;background:radial-gradient(circle,#0efad9 40%,#0efad900 85%);box-shadow:0 0 22px #0efad9aa,0 0 8px #fff9;animation:markerPulse 2s infinite alternate;"></div>`,
-        iconSize: [36,36],
-        iconAnchor: [18,18]
+    function groupByFolder(manifest) {
+      const groups = {};
+      manifest.forEach(path => {
+        if (path.endsWith('.DS_Store') || path.endsWith('manifest.json')) return;
+        const parts = path.split('/');
+        if (parts.length < 3) return;
+        const folder = parts[1];
+        const filename = parts.slice(2).join('/');
+        if (!groups[folder]) groups[folder] = [];
+        groups[folder].push(filename);
       });
-      L.marker([asset.lat, asset.lon], {icon: markerIcon}).addTo(map);
-      // Custom marker pulse
-      const style = document.createElement('style');
-      style.innerHTML = `@keyframes markerPulse {
-        0% { box-shadow:0 0 8px #0efad9, 0 0 24px #0efad900;}
-        100% { box-shadow:0 0 36px #0efad9cc, 0 0 24px #0efad922;}
-      }`;
-      document.head.appendChild(style);
+      return groups;
     }
 
-    function drawDots(activeIdx) {
-      const dots = assets.map((_, i) =>
-        `<div class="dot${i === activeIdx ? ' active' : ''}"></div>`
-      ).join('');
-      document.getElementById('slideDots').innerHTML = dots;
-    }
+    // Build folder section
+    function createFolderSection(folder, files) {
+      const section = document.createElement('section');
+      section.className = 'folder';
 
-    // Optional: keyboard navigation (left/right arrows)
-    document.addEventListener('keydown', e => {
-      if (e.key === 'ArrowRight') {
-        current = (current + 1) % assets.length;
-        showSlide(current, 0);
-      } else if (e.key === 'ArrowLeft') {
-        current = (current - 1 + assets.length) % assets.length;
-        showSlide(current, 0);
+      const title = document.createElement('h2');
+      title.textContent = folder.toUpperCase();
+      section.appendChild(title);
+
+      const originalPhoto = files.find(f => f === `${folder}.png`);
+      const originalMap = files.find(f => f === `${folder}-map.png`);
+      const generatedMaps = files.filter(f => f !== originalPhoto && f !== originalMap);
+
+      // Cycle images: originalMap first if present, then generated
+      const cycleImages = originalMap ? [originalMap, ...generatedMaps] : [...generatedMaps];
+      if (!cycleImages.length) {
+        // Nothing to show? Return empty section with title
+        return section;
       }
-    });
+
+      let currentIndex = 0;
+
+      // Main image container
+      const mainContainer = document.createElement('div');
+      mainContainer.className = 'main-image-container';
+
+      const mainImg = document.createElement('img');
+      mainImg.className = 'main-image';
+      mainImg.src = `assets/${folder}/${cycleImages[0]}`;
+      mainImg.alt = `${folder} main image`;
+      mainContainer.appendChild(mainImg);
+
+      // PiP original photo
+      if (originalPhoto) {
+        const pip = document.createElement('img');
+        pip.className = 'pip-photo';
+        pip.src = `assets/${folder}/${originalPhoto}`;
+        pip.alt = `${folder} original photo`;
+        mainContainer.appendChild(pip);
+      }
+
+      section.appendChild(mainContainer);
+
+      // Label below
+      const label = document.createElement('div');
+      label.className = 'image-label';
+      setLabelText(cycleImages[0], originalMap, label);
+      section.appendChild(label);
+
+      // Cycle on click with smooth fade
+      mainContainer.addEventListener('click', () => {
+        mainImg.style.opacity = 0;
+        setTimeout(() => {
+          currentIndex = (currentIndex + 1) % cycleImages.length;
+          mainImg.src = `assets/${folder}/${cycleImages[currentIndex]}`;
+          mainImg.style.opacity = 1;
+          setLabelText(cycleImages[currentIndex], originalMap, label);
+        }, 400);
+      });
+
+      return section;
+    }
+
+    function setLabelText(imgFile, originalMap, labelEl) {
+      if (!imgFile) {
+        labelEl.textContent = '';
+        return;
+      }
+      if (imgFile === originalMap) {
+        labelEl.textContent = 'Original Map Image';
+      } else {
+        labelEl.textContent = 'Generated Map Variant';
+      }
+    }
+
+    async function initGallery() {
+      const gallery = document.getElementById('gallery');
+      const manifest = await loadManifest();
+      if (!manifest) return;
+
+      gallery.textContent = '';
+
+      const grouped = groupByFolder(manifest);
+      const sortedFolders = Object.keys(grouped).sort();
+
+      sortedFolders.forEach(folder => {
+        const section = createFolderSection(folder, grouped[folder]);
+        gallery.appendChild(section);
+      });
+    }
+
+    initGallery();
   </script>
+
 </body>
 </html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Terminal Vision Registry</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=EB+Garamond&display=swap');
+
+    :root {
+      --pad: 20px;
+      --border-color: #000;
+    }
+
+    /* Reset */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #fff;
+      color: #000;
+      font-family: 'EB Garamond', serif;
+      font-size: 18px;
+      line-height: 1.6;
+      padding: 80px 60px 120px;
+      max-width: 1200px;
+      margin: auto;
+      position: relative;
+    }
+
+    /* Simple top/bottom borders */
+    body::before, body::after {
+      content: "";
+      position: fixed;
+      left: 0;
+      width: 100vw;
+      height: 1px;
+      background: var(--border-color);
+      pointer-events: none;
+      user-select: none;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after  { bottom: 0; }
+
+    .offset-entry {
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      grid-template-rows: auto 1fr;
+      grid-template-areas:
+        "left top"
+        "left bot";
+      border: 1px solid #000;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      padding: var(--pad);
+      gap: 10px;
+    }
+
+    .offset-left {
+      grid-area: left;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-right: 1px solid #000;
+    }
+
+    .offset-left img {
+      width: 100%;
+      border-radius: 5px;
+      object-fit: cover;
+      box-shadow: inset 0 0 6px #00000033;
+    }
+
+    .offset-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    .offset-meta.sca-1 {
+      font-weight: 900;
+      text-transform: uppercase;
+      border: 2px dashed #1a73e8;
+      padding: 6px 12px;
+      border-radius: 6px;
+      color: #1a73e8;
+      letter-spacing: 0.15em;
+      font-size: 1.1rem;
+      font-family: 'Courier New', Courier, monospace;
+      transform: skew(-10deg);
+      box-shadow:
+        0 0 8px #1a73e8aa,
+        inset 0 0 4px #1a73e8cc;
+      max-width: fit-content;
+    }
+
+    .offset-meta {
+      font-size: 1rem;
+      font-style: italic;
+      color: #444;
+    }
+
+    .offset-description {
+      font-size: 1rem;
+      color: #111;
+    }
+
+    .offset-location,
+    .offset-coords,
+    .offset-timestamp {
+      font-size: 0.9rem;
+      font-style: italic;
+      color: #333;
+    }
+
+    .offset-right {
+      grid-area: top / top / bot / bot;
+      padding-left: var(--pad);
+      font-family: 'Times New Roman', serif;
+      font-size: 1.25rem;
+      line-height: 1.4;
+      color: #222;
+    }
+    .offset-right p {
+      margin: 1em 0;
+    }
+    .offset-right h4 {
+      font-weight: 700;
+      font-style: normal;
+      margin-top: 2em;
+      margin-bottom: 1em;
+    }
+
+    .formula {
+      font-style: italic;
+      font-size: 1.5rem;
+      margin-bottom: 1em;
+      white-space: nowrap;
+    }
+
+    .offset-right hr {
+      border: none;
+      border-top: 1px solid #ddd;
+      margin: 1.5em 0;
+    }
+
+    @media (max-width: 900px) {
+      .offset-entry {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "top"
+          "bot"
+          "left";
+        padding: 20px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        border-top: 1px solid #000;
+        border-bottom: 1px solid #000;
+      }
+      .offset-left {
+        border-right: none;
+        order: 3;
+        margin-top: 20px;
+      }
+      .offset-right {
+        grid-area: top / 1 / bot / 2;
+        padding-left: 0;
+      }
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-top: 1px solid #000;
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #000;
+      padding: 12px 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      user-select: none;
+      z-index: 9999;
+    }
+    footer a {
+      border: 1px solid #000;
+      padding: 6px 14px;
+      box-shadow: 2px 2px 0 #000;
+      background: #fff;
+      color: #000;
+      text-decoration: none;
+      font-weight: 400;
+      font-family: 'EB Garamond', serif;
+    }
+    footer a:hover,
+    footer a:focus-visible {
+      background: #000;
+      color: #fff;
+      outline: none;
+    }
+
+    .offset-entry-link {
+      all: unset;
+      cursor: pointer;
+    }
+    .offset-entry-link:focus-visible {
+      outline: 3px solid #0ff;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">Loading...</div>
+
+  <footer>
+    <a href="#">REGISTRY</a>
+    <a href="./map.html">METHODOLOGY</a>
+    <a href="./globe.html">MAP</a>
+    <a href="#">UPDATES</a>
+    <a href="./index.html">ABOUT</a>
+  </footer>
+
+  <script>
+    // 1) Load the JSON manifest (list of file paths)
+    async function loadManifest() {
+      try {
+        const res = await fetch('assets/manifest.json');
+        if (!res.ok) throw new Error('Failed to load manifest.json');
+        return await res.json();
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
+    }
+
+    // 2) Load the JSON metadata file (dictionary mapping folder → metadata object)
+    async function loadMetadata() {
+      try {
+        const res = await fetch('assets/metadata.json');
+        if (!res.ok) throw new Error('Failed to load metadata.json');
+        return await res.json();
+      } catch (e) {
+        console.error(e);
+        return {};
+      }
+    }
+
+    // 3) Group file paths by folder name
+    function groupByFolder(manifest) {
+      const groups = {};
+      manifest.forEach(path => {
+        if (path.endsWith('.DS_Store') || path.endsWith('manifest.json')) return;
+        const parts = path.split('/');
+        if (parts.length < 3) return;
+        const folder = parts[1];
+        const filename = parts.slice(2).join('/');
+        if (!groups[folder]) groups[folder] = [];
+        groups[folder].push(filename);
+      });
+      return groups;
+    }
+
+    // 4) Create one “offset card” per folder
+    function createOffsetEntry(folder, files, metadata) {
+      const container = document.createElement('div');
+      container.className = 'offset-entry';
+
+      // Left column clickable area
+      const leftClickable = document.createElement('button');
+      leftClickable.className = 'offset-left offset-entry-link';
+      leftClickable.setAttribute('aria-label', `View details for ${metadata.title}`);
+      leftClickable.type = 'button';
+      leftClickable.onclick = () => {
+        window.location.href = `detail.html?case=${encodeURIComponent(folder)}`;
+      };
+
+      // Title
+      const title = document.createElement('h3');
+      title.className = 'offset-title';
+      title.textContent = metadata.title;
+      leftClickable.appendChild(title);
+
+      // Offset / Vintage metadata
+      const metaDiv = document.createElement('div');
+      metaDiv.className = 'offset-meta';
+      if (metadata.offset === 'SCA-1') {
+        metaDiv.classList.add('sca-1');
+        metaDiv.textContent = 'SCA-1';
+      } else {
+      ///  metaDiv.innerHTML = `Offset: ${metadata.offset}<br/>Vintage: ${metadata.vintage}`;
+      }
+      leftClickable.appendChild(metaDiv);
+
+      // Pick an image (prefer “-map.png” if present, else any .png)
+      const img = document.createElement('img');
+      const mapFile = files.find(f => f.includes('-map.png')) || files.find(f => f.endsWith('.png'));
+      img.src = mapFile ? `assets/${folder}/${mapFile}` : '';
+      img.alt = metadata.title + ' map image';
+      leftClickable.appendChild(img);
+
+      // Location line
+      const location = document.createElement('div');
+      location.className = 'offset-location';
+      location.textContent = `Location: ${metadata.location}`;
+      leftClickable.appendChild(location);
+
+      // Coordinates line
+      if (metadata.latitude != null && metadata.longitude != null) {
+        const coords = document.createElement('div');
+        coords.className = 'offset-coords';
+        coords.textContent = `Coordinates: ${metadata.latitude.toFixed(6)}, ${metadata.longitude.toFixed(6)}`;
+        leftClickable.appendChild(coords);
+      }
+
+      // Timestamp line
+      if (metadata.timestamp) {
+        const ts = document.createElement('div');
+        ts.className = 'offset-timestamp';
+        ts.textContent = `Timestamp: ${metadata.timestamp}`;
+        leftClickable.appendChild(ts);
+      }
+
+      // Description
+      const desc = document.createElement('p');
+      desc.className = 'offset-description';
+      desc.textContent = metadata.description;
+      leftClickable.appendChild(desc);
+
+      container.appendChild(leftClickable);
+
+      // Right column (formula + methodology)
+      const right = document.createElement('div');
+      right.className = 'offset-right';
+
+      if (metadata.formula) {
+        const formula = document.createElement('p');
+        formula.className = 'formula';
+        formula.textContent = metadata.formula;
+        right.appendChild(formula);
+      }
+
+      right.appendChild(document.createElement('hr'));
+
+      if (metadata.methodologyTitle) {
+        const methTitle = document.createElement('h4');
+        methTitle.textContent = metadata.methodologyTitle;
+        right.appendChild(methTitle);
+      }
+
+      if (metadata.methodologyText) {
+        metadata.methodologyText.split('\n\n').forEach(paragraph => {
+          const p = document.createElement('p');
+          p.innerHTML = paragraph.replace(/\n/g, '<br />');
+          right.appendChild(p);
+        });
+      }
+
+      container.appendChild(right);
+      return container;
+    }
+
+    // 5) Initialize page: fetch both JSON files, then build entries
+    async function init() {
+      const container = document.getElementById('container');
+      container.textContent = 'Loading…';
+
+      // Fetch manifest.json and metadata.json in parallel
+      const [manifest, metadataMap] = await Promise.all([
+        loadManifest(),
+        loadMetadata()
+      ]);
+      if (!manifest) {
+        container.textContent = 'Failed to load manifest.';
+        return;
+      }
+
+      // Group all image file paths by folder
+      const grouped = groupByFolder(manifest);
+      const folders = Object.keys(grouped).sort();
+      container.textContent = '';
+
+      folders.forEach(folder => {
+        // Look up metadata for this folder (case‐sensitive). If missing, use a minimal default.
+        let meta = metadataMap[folder] || {
+          title: folder,
+          offset: 'N/A',
+          vintage: 'N/A',
+          location: 'Unknown',
+          description: 'No description available.',
+          latitude: null,
+          longitude: null,
+          timestamp: null,
+          formula: '',
+          methodologyTitle: '',
+          methodologyText: ''
+        };
+        const files = grouped[folder];
+        const entry = createOffsetEntry(folder, files, meta);
+        container.appendChild(entry);
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
