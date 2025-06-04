@@ -329,7 +329,7 @@
 
       for (const [id, lat, lon, time] of localAssets) {
         const userECI   = convertLatLongTo3D(lat, lon);
-        const imageUrl  = `assets/${id.toUpperCase()}/${id.toLowerCase()}.png`;
+        const imageUrl = `assets/${id.toLowerCase()}/${id.toLowerCase()}.png`;
 
         try {
           const satelliteECI = await fetchSatelliteECIForTime(time, id);
