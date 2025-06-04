@@ -491,6 +491,8 @@
       //    before we ever call `startTriangleAnimation()`.
       await plotAssetsWithSatellite();
 
+  // 1-second pause to give Reactors/Earth/satellite models a moment to settle
+  await new Promise(resolve => setTimeout(resolve, 1000));
       // 2) Now that every triangle exists, start the “yellow highlight” loop.
       startTriangleAnimation();
 
