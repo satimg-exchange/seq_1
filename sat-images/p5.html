@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Patchwork Satellite Assembly with EM Spectrum Effect</title>
+    <!-- Load the p5.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; }
+    </style>
+  </head>
+  <body>
+    <script>
+      let groundImg, satelliteImg;
+      let processedGround; // This will store the ground image after EM spectral processing.
+      let patches = [];    // Array to store precomputed patch objects.
+
+      // Adjust grid resolution for performance.
+      const cols = 15;
+      const rows = 15;
+      let tileW, tileH;  // Width and height of each patch.
+      let startTime;
+      const assemblyDuration = 10; // Assembly animation length in seconds.
+
+      // Extended Metadata information.
+      const metadata = {
+        timestamp: "2025-04-15 12:34:56",
+        lat: "34.0522° N",
+        long: "118.2437° W",
+        description: "satellite_image_of_an_fair_in_the_park"
+      };
+
+      // preload() loads both the ground and the satellite images.
+      function preload() {
+        groundImg = loadImage("ground.png");
+        satelliteImg = loadImage("satellite.jpg");
+      }
+
+      function setup() {
+        createCanvas(windowWidth, windowHeight);
+        // Resize images to cover the canvas.
+        groundImg.resize(width, height);
+        satelliteImg.resize(width, height);
+        
+        // Create the processed version of the ground image to simulate EM spectral effects.
+        processedGround = createImage(width, height);
+        processGroundImage();
+
+        // Determine tile dimensions.
+        tileW = width / cols;
+        tileH = height / rows;
+        startTime = millis();
+
+        // Precompute patch images from the satellite image.
+        for (let i = 0; i < cols; i++) {
+          for (let j = 0; j < rows; j++) {
+            let finalX = i * tileW;
+            let finalY = j * tileH;
+            // Each patch starts at a random location off the grid.
+            let startX = random(-tileW, width + tileW);
+            let startY = random(-tileH, height + tileH);
+            // Precompute the patch image from the satellite image.
+            let patchImg = satelliteImg.get(finalX, finalY, tileW, tileH);
+            patches.push({ finalX, finalY, startX, startY, img: patchImg });
+          }
+        }
+
+        textFont('monospace');
+        textSize(20);
+        textAlign(LEFT, TOP);
+      }
+
+      // processGroundImage() applies a spectral transformation to simulate electromagnetic effects.
+      function processGroundImage() {
+        groundImg.loadPixels();
+        processedGround.loadPixels();
+        // Loop through each pixel.
+        for (let i = 0; i < groundImg.pixels.length; i += 4) {
+          let r = groundImg.pixels[i];
+          let g = groundImg.pixels[i + 10];
+          let b = groundImg.pixels[i + 20];
+          // Simulate spectral adjustments:
+          // For example, boost the red and green channels (mimicking enhanced near-infrared response)
+          // and reduce the blue channel.
+          processedGround.pixels[i]     = constrain(r * 20.5, 0, 255);  // Boost red.
+          processedGround.pixels[i + 1] = constrain(g * 10.3, 0, 255);  // Boost green.
+          processedGround.pixels[i + 2] = constrain(b * 5.7, 0, 255);  // Reduce blue.
+          processedGround.pixels[i + 3] = 255;
+        }
+        processedGround.updatePixels();
+      }
+
+      function draw() {
+        background(0);
+
+        // Calculate global progress (0 = start; 1 = full assembly and full EM effect).
+        let elapsed = (millis() - startTime) / 1000.0;
+        let globalProgress = constrain(elapsed / assemblyDuration, 0, 1);
+
+        // Draw the ground image with a blend that simulates receiving EM spectrum processing.
+        // At progress=0, show the raw ground image; at progress=1, show the fully processed version.
+        image(groundImg, 0, 0, width, height);
+        tint(255, globalProgress * 255);
+        image(processedGround, 0, 0, width, height);
+        noTint();
+
+        // Draw the patchwork assembly over the ground.
+        for (let p of patches) {
+          let currentX = lerp(p.startX, p.finalX, globalProgress);
+          let currentY = lerp(p.startY, p.finalY, globalProgress);
+          tint(255, lerp(0, 255, globalProgress));
+          image(p.img, currentX, currentY, tileW, tileH);
+          noTint();
+        }
+
+        // Draw the metadata overlay.
+        drawMetadata();
+
+        // Stop the animation once assembly is complete.
+        if (globalProgress >= 1) {
+          noLoop();
+        }
+      }
+
+      // Draws a semi-transparent panel with metadata text.
+      function drawMetadata() {
+        let padding = 10;
+        fill(0, 150);
+        noStroke();
+        rect(padding, padding, 400, 140, 10);
+
+        fill(255);
+        text("Timestamp: " + metadata.timestamp, padding + 10, padding + 10);
+        text("Latitude: " + metadata.lat, padding + 10, padding + 40);
+        text("Longitude: " + metadata.long, padding + 10, padding + 70);
+        text("Description: " + metadata.description, padding + 10, padding + 100);
+      }
+
+      // When the window is resized, update canvas size, images, and reinitialize patches.
+      function windowResized() {
+        resizeCanvas(windowWidth, windowHeight);
+        groundImg.resize(width, height);
+        satelliteImg.resize(width, height);
+        processedGround = createImage(width, height);
+        processGroundImage();
+
+        tileW = width / cols;
+        tileH = height / rows;
+        patches = [];
+        for (let i = 0; i < cols; i++) {
+          for (let j = 0; j < rows; j++) {
+            let finalX = i * tileW;
+            let finalY = j * tileH;
+            let startX = random(-tileW, width + tileW);
+            let startY = random(-tileH, height + tileH);
+            let patchImg = satelliteImg.get(finalX, finalY, tileW, tileH);
+            patches.push({ finalX, finalY, startX, startY, img: patchImg });
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

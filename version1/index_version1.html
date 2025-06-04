@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>satellite network image exchange</title>
+  <meta name="description" content="Star Chain of Arts Project">
+  <meta property="og:title" content="satellite network image exchange">
+
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
+  <script src="iframe.js"></script>
+  <script src="app.js" defer></script>
+  <!-- Include Axios CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="p5.js"></script>
+  <script src="p5.min.js"></script>
+
+  <style>
+        :root {
+      --pad: 20px;
+      --border-color: #fff;
+      --text-color: #eee;
+      --subtext-color: #ccc;
+      --section-bg: #111;
+      --hr-color: #444;
+      --footer-bg: #000;
+      --footer-border: #fff;
+      --link-bg: #111;
+      --link-color: #eee;
+      --link-hover-bg: #eee;
+      --link-hover-color: #000;
+    }
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--footer-bg);
+      border-top: 1px solid var(--footer-border);
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-color);
+      padding: 12px 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      user-select: none;
+      z-index: 9999;
+    }
+
+    footer a {
+      border: 1px solid var(--footer-border);
+      padding: 6px 14px;
+      box-shadow: 2px 2px 0 var(--footer-border);
+      background: var(--link-bg);
+      color: var(--link-color);
+      text-decoration: none;
+      font-weight: 400;
+      font-family: 'EB Garamond', serif;
+    }
+
+    footer a:hover,
+    footer a:focus-visible {
+      background: var(--link-hover-bg);
+      color: var(--link-hover-color);
+      outline: none;
+    }
+  </style>
+</head>
+
+<body>
+  <p class="exchange">
+    _satellite_network_image_exchange_卫星网络影像交换_
+  </p>
+
+  <h3 class="lang">
+    <a href="index_version1.html">ENG</a> 
+    <br> | 
+    <br><a href="upload_page_ch.html">中文</a>
+  </h3>
+
+  <div class="title">
+    <p>
+      &gt; What is the world you would like us to see?
+    </p>
+  </div>
+
+  <div class="text">
+    <p>
+      If you could send one image into space for everyone to see, what would you choose to upload?
+    </p>
+  </div>
+
+  <img src="xu-studio-img_SCA test.png" class="sca" alt="SCA Test Image">
+
+  <!-- Start Camera Button -->
+  <button id="startCameraButton" class="startcam-button">START CAMERA</button>
+
+  <!-- Local Upload Button -->
+  <button id="uploadLocalButton" class="upload-button">LOCAL UPLOAD</button>
+  <input type="file" id="localImageInput" style="display:none;" />
+
+  <!-- Modal/Container for Camera and Buttons -->
+  <div id="cameraContainer" class="camera-container" style="display:none;">
+    <button id="closeCamera" class="close-button">X</button>
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+    <!-- Camera Control Buttons -->
+    <button id="switchButton" class="switchcam-button">SWITCH CAMERA</button>
+    <button id="captureButton" class="capture-button">TAKE PHOTO</button>
+  </div>
+
+  <p id="locationData" class="location-data"></p>
+
+  <button id="about-button" onclick="abouttoggleIframe()">ABOUT</button>
+  <button id="metadata-button" onclick="metadatatoggleIframe()">DATA EXCHANGE</button>
+  <button id="ai-button" onclick="aitoggleIframe()">IMAGE CHAIN</button>
+  <button id="research-button" onclick="researchtoggleIframe()">RESEARCH NOTES</button>
+  <button id="updates-button" onclick="updatestoggleIframe()">UPDATES</button>
+  <button id="map-button" onclick="maptoggleIframe()">VIEW MAP</button>
+  <iframe id="aboutpopupFrame" src="about.html"></iframe>
+  <iframe id="metadatapopupFrame" src="metadata.html"></iframe>
+  <iframe id="aipopupFrame" src="aipipeline.html"></iframe>
+  <iframe id="researchpopupFrame" src="research.html"></iframe>
+  <iframe id="updatespopupFrame" src="updates.html"></iframe>
+  <iframe id="mappopupFrame"></iframe>
+
+  <p class="poetic-text">
+    This is a commissioned work for the Star Chain of Arts Project at the Xu Bing Space Art Residency Program. 
+  </p>
+
+  <footer>
+    <nav>
+      <a href="../registry.html">REGISTRY</a>
+      <a href="../globe.html">MAP</a>
+      <a href="index_version1.html">UPDATES</a>
+      <a href="../index.html">ABOUT</a>
+    </nav>
+  </footer>
+</body>
+</html>

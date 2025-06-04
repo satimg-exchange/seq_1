@@ -1,210 +1,95 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Map</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.0.0/satellite.min.js"></script>
-
-  <link rel="stylesheet" href="style.css">
-
+  <title>Assets with Time</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+  />
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
   <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;  /* Full height within the iframe */
-      width: 100%;   /* Full width within the iframe */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: black;
-    }
-
-    /* Map container centered and taking 50% of iframe */
     #map {
-      width: 99%;   /* 50% of iframe width */
-      height: 99%;  /* 50% of iframe height */
-      border: 10px solid white; /* Optional border to visualize map boundaries */
+      height: 100vh;
+    }
+    .popup-img {
+      width: 200px;
+      height: auto;
+    }
+    .popup-text {
+      font-size: 0.9em;
+      margin-top: 5px;
     }
   </style>
 </head>
 <body>
   <div id="map"></div>
+
   <script>
-    // Initialize the map
-    let map, satelliteMarker, satellitePath;
+    const map = L.map('map').setView([25, 100], 3);
 
-    // Fetch and place markers from pinned files
-    const JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiI4MGY2MzY2Mi00MWQ1LTQyOGYtOTUxYS0wMDg1ODIwMjY2ZTYiLCJlbWFpbCI6InBjb3NoZWEyQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaW5fcG9saWN5Ijp7InJlZ2lvbnMiOlt7ImlkIjoiRlJBMSIsImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxfSx7ImlkIjoiTllDMSIsImRlc2lyZWRSZXBsaWNhdGlvbkNvdW50IjoxfV0sInZlcnNpb24iOjF9LCJtZmFfZW5hYmxlZCI6ZmFsc2UsInN0YXR1cyI6IkFDVElWRSJ9LCJhdXRoZW50aWNhdGlvblR5cGUiOiJzY29wZWRLZXkiLCJzY29wZWRLZXlLZXkiOiI3NDJmOTBmN2QxYjcwZDZkNjUwNiIsInNjb3BlZEtleVNlY3JldCI6ImFkODU3YTJhNmJmMmQ1Y2Q5ODdiMzRlNjM4ZWIwNjAyYTk1ZTlmODZjMzYwYTA2ZjJlZmY5MTdkZmYwNWU1ZjIiLCJpYXQiOjE3MjYzMzkyMDJ9.HqFIo_7uTKZc-QwnEePMqjWByBc-21vFG-6AlUgX-so';
-
-
-
-
-
-    function initializeMap() {
-    map = L.map('map').setView([0, 0], 2); // Use the 'map' ID here
-    L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}{r}.png?api_key=00eeb312-5451-4731-9655-f1df4e8084f9', {
-        maxZoom: 19,
-        minZoom: 2,
-        attribution: '© OpenStreetMap'
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
-}
+
+    // Assets with [id, lat, lon, time]
+    const assets = [
+      ['C1', 34.2655, 108.8955, '01/30/25, 5:31PM GMT+8'],
+      ['C2', 31.3896, 121.5225, '12/19/24, 2:24PM GMT+8'],
+   //   ['C3', 13.734, 100.5478, '11/17/24, 7:22 AM GMT+7'],
+      ['C4', 13.743853, 100.589287, '11/13/24, 9:41 AM GMT+7'],
+   //   ['C5', 13.741453, 100.589378, '11/13/24, 9:35 AM GMT+7'],
+   //   ['C6', 18.7827, 98.985008, '11/7/24, 9:54 AM GMT+7'],
+   //   ['C7', 31.246578, 121.501892, '9/23/24, 9:53 PM GMT+8'],
+   //   ['C8', 31.240447, 121.493845, '9/7/24, 6:13 PM GMT+8'],
+   //   ['C9', 22.853213, 106.728158, '8/23/24, 3:01 PM GMT+8'],
+      ['C10', 22.855908, 106.724137, '8/23/24, 12:39 PM GMT+8'],
+   //   ['C11', 22.813405, 108.316763, '8/18/24, 7:16 PM GMT+8'],
+      ['C12', 31.272038, 121.555763, '8/3/24, 6:08 PM GMT+8'],
+   //   ['C13', 31.27293, 121.553092, '8/3/24, 5:27 PM GMT+8'],
+      ['C14', 31.192763, 121.299422, '4/13/24, 8:56 PM GMT+8'],
+   //   ['C15', 31.224987, 121.41497, '4/13/24, 4:15 PM GMT+8'],
+   //   ['C16', 31.214425, 121.403542, '3/14/24, 1:38 PM GMT+8'],
+      ['C17', 34.302837, 117.290383, '2/15/24, 12:09 PM GMT+8'],
+      ['C18', 34.232463, 109.122156, '2/13/24, 3:21 PM GMT+8'],
+      ['C19', 22.282508, 114.191162, '1/30/24, 10:20 AM GMT+8'],
+   //   ['C20', 22.302263, 114.18087, '1/29/24, 1:15 PM GMT+8'],
+    //  ['C21', 22.32982, 114.113389, '1/26/24, 5:39 PM GMT+8'],
+    //  ['C22', 31.253887, 121.479928, '1/20/24, 1:01 PM GMT+8'],
+   //   ['C23', 18.799445, 98.933845, '1/5/24, 5:03 PM GMT+7'],
+      ['C24', 18.799705, 98.939112, '1/5/24, 5:45 PM GMT+7'],
+   //   ['C25', 19.911933, 99.825858, '1/3/24, 9:42 PM GMT+7'],
+   //   ['C26', 20.333733, 100.088256, '1/3/24, 3:56 PM GMT+7'],
+      ['C27', 20.350608, 100.082856, '1/3/24, 3:47 PM GMT+7'],
+      ['C28', 19.912762, 99.824487, '1/2/24, 5:25 PM GMT+7'],
+   //   ['C29', 18.796825, 98.976563, '1/1/24, 7:52 PM GMT+7'],
+      ['C30', 18.796292, 98.982978, '1/1/24, 5:19 PM GMT+7'],
+  //    ['P1', 46.1, 8.47, '08/13/24 12:54 AM'],
+      ['P2', 44.91871399, -73.12477538, '07/27/24 10:23 PM'],
+   //   ['P3', 45.4879829, -74.1332526, '09/01/2024 8:42 PM'],
+      ['P4', 44.97115405, -72.89641591, '08/25/2024 6:04 PM'],
+   //   ['P5', 12.48438335, -61.4569823, '12/04/24 7:24 PM'],
+   //   ['P6', 44.97758653, -72.88271731, '5/11/24 4:40 PM'],
+      ['P7', 13.75, 100.49, '02/02/24 12:00 PM'],
+      ['P8', 46.813, -71.2, '10/20/2024 2:31 PM'],
+      ['P10', 49.28, -123.105, '11/02/2024 4:30 PM'],
+      ['P11', 45.54, -73.58, '01/12/25 10:00 AM'],
+    ];
+
+    assets.forEach(([id, lat, lon, time]) => {
+      const folder = id.toUpperCase();
+      const file = `${folder.toLowerCase()}.png`;
+const imgPath = `assets/${folder}/${file}`;
 
 
-let satelliteFuturePath;
-
-async function fetchSatellitePath() {
-  try {
-    const tleUrl = 'https://celestrak.com/NORAD/elements/gp.php?CATNR=58924';
-    const response = await axios.get(tleUrl);
-    const tleData = response.data.split('\n');
-
-    // Parse TLE lines for the satellite
-    const tleLine1 = tleData[1];
-    const tleLine2 = tleData[2];
-    const satrec = satellite.twoline2satrec(tleLine1, tleLine2);
-
-    const currentPathCoordinates = [];
-    const futurePathCoordinates = [];
-
-    // Calculate the past/current path (last 5 minutes)
-    for (let i = -300; i <= 0; i++) {  // Negative interval for past positions (5 minutes back)
-      const time = new Date(Date.now() + i * 1000);
-      const positionAndVelocity = satellite.propagate(satrec, time);
-      const gmst = satellite.gstime(time);
-
-      // Convert to geodetic coordinates
-      const positionGd = satellite.eciToGeodetic(positionAndVelocity.position, gmst);
-      const latitude = satellite.degreesLat(positionGd.latitude);
-      const longitude = satellite.degreesLong(positionGd.longitude);
-
-      currentPathCoordinates.push([latitude, longitude]);
-    }
-
-    // Calculate the future path (next 15 minutes)
-    for (let i = 0; i <= 5000; i += 30) {  // 10-second intervals for smoother future path
-      const time = new Date(Date.now() + i * 1000);
-      const positionAndVelocity = satellite.propagate(satrec, time);
-      const gmst = satellite.gstime(time);
-
-      // Convert to geodetic coordinates
-      const positionGd = satellite.eciToGeodetic(positionAndVelocity.position, gmst);
-      const latitude = satellite.degreesLat(positionGd.latitude);
-      const longitude = satellite.degreesLong(positionGd.longitude);
-
-      futurePathCoordinates.push([latitude, longitude]);
-    }
-
-    // Remove previous paths if they exist
-    if (satellitePath) {
-      map.removeLayer(satellitePath);
-    }
-    if (satelliteFuturePath) {
-      map.removeLayer(satelliteFuturePath);
-    }
-
-    // Draw current/past path on the map (yellow)
-    satellitePath = L.polyline(currentPathCoordinates, { color: 'yellow', weight: 2 }).addTo(map);
-
-    // Draw future path on the map (blue)
-    satelliteFuturePath = L.polyline(futurePathCoordinates, { color: 'blue', weight: 2, dashArray: '5, 10' }).addTo(map);
-
-    // Set the marker to the latest position
-    const [latestLat, latestLng] = currentPathCoordinates[currentPathCoordinates.length - 1];
-    if (satelliteMarker) {
-      satelliteMarker.setLatLng([latestLat, latestLng]);
-    } else {
-      satelliteMarker = L.marker([latestLat, latestLng]).addTo(map).bindPopup(`Satellite NORAD ID: 58924`);
-    }
-
-    // Center the map on the latest satellite position
-   // map.setView([latestLat, latestLng], 4);
-  } catch (error) {
-    console.error('Error fetching satellite path:', error);
-    alert('Failed to fetch satellite path.');
-  }
-}
-
-
-// Function to fetch pinned files and display locations on the map
-async function fetchPinnedFiles() {
-    try {
-        const res = await axios.get('https://api.pinata.cloud/data/pinList', {
-            headers: {
-                Authorization: `Bearer ${JWT}`,
-            },
-        });
-
-        const pinnedFiles = res.data.rows;
-        const activeFiles = pinnedFiles.filter(file => file.date_unpinned === null);
-
-        // Clear existing map markers
-        if (map) map.eachLayer(layer => { if (layer instanceof L.Marker) map.removeLayer(layer); });
-
-        activeFiles.forEach(file => {
-            const metadata = file.metadata?.keyvalues || {};
-            console.log(file, metadata);
-            const lat = parseFloat(metadata.latitude);
-            const lng = parseFloat(metadata.longitude);
-            const ipfsHash = file.ipfs_pin_hash;
-            const datePinned = new Date(file.date_pinned).toLocaleDateString('en-US');
-
-            if (!isNaN(lat) && !isNaN(lng) && ipfsHash) {
-                const imageUrl = `https://ipfs.io/ipfs/${ipfsHash}`;
-                // Place marker on map
-                const customIcon = L.icon({
-                    iconUrl: imageUrl,         // Use IPFS image as marker icon
-                    iconSize: [50, 50],        // Adjust icon size as needed
-                    iconAnchor: [25, 50],      // Adjust anchor to position properly
-                    popupAnchor: [0, -50]      // Position popup above the icon
-                });
-
-                // Place marker on map with custom icon
-                const marker = L.marker([lat, lng], { icon: customIcon })
-                    .addTo(map)
-                    .bindPopup(
-                        `<strong>${file.metadata?.name || 'No name'}</strong><br>
-                        Latitude: ${lat}, Longitude: ${lng}<br>
-                        <img src="${imageUrl}" alt="IPFS Image" class="marker-img"><br>
-                        Date: ${datePinned}<br>`);
-
-                                // Add click event listener to zoom into marker when clicked
-                marker.on('click', () => {
-                    map.setView([lat, lng], 13); // Zoom level 15 for closer view; adjust as needed
-                });
-                                        // Calculate 1-mile bounding box
-                const mileInDegreesLat = 0.05;
-                const mileInDegreesLng = 0.05 / Math.cos(lat * Math.PI / 180);
-
-                const bounds = [
-                    [lat - mileInDegreesLat / 2, lng - mileInDegreesLng / 2], // Southwest corner
-                    [lat + mileInDegreesLat / 2, lng + mileInDegreesLng / 2]  // Northeast corner
-                ];
-
-                // Draw the bounding box
-                L.rectangle(bounds, { color: "#ff7800", weight: 1, fillOpacity: 0.2 }).addTo(map);
-            }
-        });
-    } catch (error) {
-        console.error('Error fetching pinned files:', error);
-        alert('Failed to fetch pinned files. Please try again.');
-    }
-}
-
-// Call fetchPinnedFiles on page load and initialize map
-document.addEventListener("DOMContentLoaded", async () => {
-    initializeMap();
-    await fetchPinnedFiles();
-    fetchSatellitePath();
-    setInterval(fetchSatellitePath, 15000); // Update satellite position every 5 seconds
-});
-
-
-
+      L.marker([lat, lon]).addTo(map)
+        .bindPopup(`
+          <strong>${id}</strong><br>
+          <img src="${imgPath}" class="popup-img"><br>
+          <div class="popup-text"><strong>Time:</strong> ${time}</div>
+        `);
+    });
   </script>
-    <button id="closeFrame" class="close-button" onclick="parent.closemaptoggleIframe()">X</button>
-
 </body>
 </html>

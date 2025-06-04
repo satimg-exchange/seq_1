@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Terminal Vision Registry</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=EB+Garamond&display=swap');
+
+    :root {
+      --pad: 20px;
+      --border-color: #fff;
+      --text-color: #eee;
+      --subtext-color: #ccc;
+      --card-bg: #111;
+      --card-border: #555;
+      --hr-color: #444;
+      --footer-bg: #000;
+      --footer-border: #fff;
+      --link-bg: #111;
+      --link-color: #eee;
+      --link-hover-bg: #eee;
+      --link-hover-color: #000;
+    }
+
+    /* Reset */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #000;
+      color: var(--text-color);
+      font-family: 'Helvetica', serif;
+      font-size: 18px;
+      line-height: 1.6;
+      padding: 80px 60px 120px;
+      max-width: 1200px;
+      margin: auto;
+      position: relative;
+    }
+
+    /* Top/bottom white borders */
+    body::before, body::after {
+      content: "";
+      position: fixed;
+      left: 0;
+      width: 100vw;
+      height: 1px;
+      background: var(--border-color);
+      pointer-events: none;
+      user-select: none;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after  { bottom: 0; }
+
+    .offset-entry {
+      background: var(--card-bg);
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      margin-bottom: 30px;
+      padding: var(--pad);
+      gap: 10px;
+      cursor: pointer;               /* make the whole card clickable */
+    }
+    .offset-entry:hover {
+      box-shadow: 0 0 10px #ffffff33;
+    }
+
+    .offset-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin: 0;
+      color: var(--text-color);
+    }
+
+    .offset-meta.sca-1 {
+      font-weight: 900;
+      text-transform: uppercase;
+      border: 2px dashed #1a73e8;
+      padding: 6px 12px;
+      border-radius: 6px;
+      color: #1a73e8;
+      letter-spacing: 0.15em;
+      font-size: 1.1rem;
+      font-family: 'Courier New', Courier, monospace;
+      transform: skew(-10deg);
+      box-shadow:
+        0 0 8px #1a73e8aa,
+        inset 0 0 4px #1a73e8cc;
+      max-width: fit-content;
+      background: transparent;
+    }
+
+    .offset-meta {
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--subtext-color);
+    }
+
+    .img-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .img-row img {
+      width: 50%;
+      border-radius: 5px;
+      object-fit: cover;
+      box-shadow: inset 0 0 6px #00000033;
+    }
+
+    .offset-description {
+      font-size: 1rem;
+      color: var(--text-color);
+    }
+
+    .offset-location,
+    .offset-coords,
+    .offset-timestamp {
+      font-size: 0.9rem;
+      font-style: italic;
+      color: var(--subtext-color);
+    }
+
+    @media (max-width: 900px) {
+      .img-row {
+        flex-direction: column;
+      }
+      .img-row img {
+        width: 100%;
+      }
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--footer-bg);
+      border-top: 1px solid var(--footer-border);
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-color);
+      padding: 12px 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      user-select: none;
+      z-index: 9999;
+    }
+    footer a {
+      border: 1px solid var(--footer-border);
+      padding: 6px 14px;
+      box-shadow: 2px 2px 0 var(--footer-border);
+      background: var(--link-bg);
+      color: var(--link-color);
+      text-decoration: none;
+      font-weight: 400;
+      font-family: 'EB Garamond', serif;
+    }
+    footer a:hover,
+    footer a:focus-visible {
+      background: var(--link-hover-bg);
+      color: var(--link-hover-color);
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">Loading...</div>
+
+  <footer>
+    <a href="#">REGISTRY</a>
+    <a href="./globe.html">MAP</a>
+    <a href="#">UPDATES</a>
+    <a href="./index.html">ABOUT</a>
+  </footer>
+
+  <script>
+    // 1) Load manifest.json
+    async function loadManifest() {
+      try {
+        const res = await fetch('assets/manifest.json');
+        if (!res.ok) throw new Error('Failed to load manifest.json');
+        return await res.json();
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
+    }
+
+    // 2) Load metadata.json
+    async function loadMetadata() {
+      try {
+        const res = await fetch('assets/metadata.json');
+        if (!res.ok) throw new Error('Failed to load metadata.json');
+        return await res.json();
+      } catch (e) {
+        console.error(e);
+        return {};
+      }
+    }
+
+    // 3) Group file paths by folder
+    function groupByFolder(manifest) {
+      const groups = {};
+      manifest.forEach(path => {
+        if (path.endsWith('.DS_Store') || path.endsWith('manifest.json')) return;
+        const parts = path.split('/');
+        if (parts.length < 3) return;
+        const folder = parts[1];
+        const filename = parts.slice(2).join('/');
+        if (!groups[folder]) groups[folder] = [];
+        groups[folder].push(filename);
+      });
+      return groups;
+    }
+
+    // 4) Create one “offset card” per folder
+    function createOffsetEntry(folder, files, metadata) {
+      const container = document.createElement('div');
+      container.className = 'offset-entry';
+      // Make entire card clickable:
+      container.onclick = () => {
+        window.location.href = `detail.html?case=${encodeURIComponent(folder)}`;
+      };
+
+      // ============ LEFT COLUMN ============
+      const leftCol = document.createElement('div');
+      leftCol.className = 'offset-left';
+
+      // Title
+      const title = document.createElement('h3');
+      title.className = 'offset-title';
+      title.textContent = metadata.title;
+      leftCol.appendChild(title);
+
+      // Offset / Vintage metadata
+      const metaDiv = document.createElement('div');
+      metaDiv.className = 'offset-meta';
+      if (metadata.offset === 'SCA-1') {
+        metaDiv.classList.add('sca-1');
+        metaDiv.textContent = 'SCA-1';
+      }
+      leftCol.appendChild(metaDiv);
+
+      // --- Pick exactly two images:
+      const imgRow = document.createElement('div');
+      imgRow.className = 'img-row';
+
+      // 1) Prefer “-map.png” as first image
+      const mapFile = files.find(f => f.endsWith('-map.png'));
+      // 2) Then pick another .png (not the map)
+      const otherFile = files.find(f => f.endsWith('.png') && f !== mapFile);
+
+      const chosen = [];
+      if (mapFile) chosen.push(mapFile);
+      if (otherFile) chosen.push(otherFile);
+      // If only one found, duplicate it so two columns render
+      if (chosen.length === 1) chosen.push(chosen[0]);
+      // If none found, leave blanks (or use a placeholder)
+      if (chosen.length === 0) {
+        // optionally show a transparent placeholder box
+        for (let i = 0; i < 2; i++) {
+          const placeholder = document.createElement('div');
+          placeholder.style.width = '50%';
+          placeholder.style.height = '120px';
+          placeholder.style.background = '#222';
+          imgRow.appendChild(placeholder);
+        }
+      } else {
+        chosen.forEach(fname => {
+          const imgEl = document.createElement('img');
+          imgEl.src = `assets/${folder}/${fname}`;
+          imgEl.alt = `${metadata.title} image`;
+          imgRow.appendChild(imgEl);
+        });
+      }
+      leftCol.appendChild(imgRow);
+
+      // Location line
+      const location = document.createElement('div');
+      location.className = 'offset-location';
+      location.textContent = `Location: ${metadata.location}`;
+      leftCol.appendChild(location);
+
+      // Coordinates line
+      if (metadata.latitude != null && metadata.longitude != null) {
+        const coords = document.createElement('div');
+        coords.className = 'offset-coords';
+        coords.textContent = `Coordinates: ${metadata.latitude.toFixed(6)}, ${metadata.longitude.toFixed(6)}`;
+        leftCol.appendChild(coords);
+      }
+
+      // Timestamp line
+      if (metadata.timestamp) {
+        const ts = document.createElement('div');
+        ts.className = 'offset-timestamp';
+        ts.textContent = `Timestamp: ${metadata.timestamp}`;
+        leftCol.appendChild(ts);
+      }
+
+      // Description
+      const desc = document.createElement('p');
+      desc.className = 'offset-description';
+      desc.textContent = metadata.description;
+      leftCol.appendChild(desc);
+
+      container.appendChild(leftCol);
+
+      // ============ RIGHT COLUMN ============
+      const right = document.createElement('div');
+      right.className = 'offset-right';
+
+      if (metadata.formula) {
+        const formula = document.createElement('p');
+        formula.className = 'formula';
+        formula.textContent = metadata.formula;
+        right.appendChild(formula);
+      }
+
+      right.appendChild(document.createElement('hr'));
+
+      if (metadata.methodologyTitle) {
+        const methTitle = document.createElement('h4');
+        methTitle.textContent = metadata.methodologyTitle;
+        right.appendChild(methTitle);
+      }
+
+      if (metadata.methodologyText) {
+        metadata.methodologyText.split('\n\n').forEach(paragraph => {
+          const p = document.createElement('p');
+          p.innerHTML = paragraph.replace(/\n/g, '<br />');
+          right.appendChild(p);
+        });
+      }
+
+      container.appendChild(right);
+      return container;
+    }
+
+    // 5) Initialize page: fetch both JSON files, then build entries
+    async function init() {
+      const container = document.getElementById('container');
+      container.textContent = 'Loading…';
+
+      // Fetch manifest.json and metadata.json in parallel
+      const [manifest, metadataMap] = await Promise.all([
+        loadManifest(),
+        loadMetadata()
+      ]);
+      if (!manifest) {
+        container.textContent = 'Failed to load manifest.';
+        return;
+      }
+
+      // Group all image file paths by folder
+      const grouped = groupByFolder(manifest);
+      const folders = Object.keys(grouped).sort();
+      container.textContent = '';
+
+      folders.forEach(folder => {
+        // Look up metadata for this folder (case‐sensitive). If missing, use a default
+        const meta = metadataMap[folder] || {
+          title: folder,
+          offset: 'N/A',
+          vintage: 'N/A',
+          location: 'Unknown',
+          description: 'No description available.',
+          latitude: null,
+          longitude: null,
+          timestamp: null,
+          formula: '',
+          methodologyTitle: '',
+          methodologyText: ''
+        };
+        const files = grouped[folder];
+        const entry = createOffsetEntry(folder, files, meta);
+        container.appendChild(entry);
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>

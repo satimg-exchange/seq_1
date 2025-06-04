@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Satellite Triangulation Visualization</title>
+  <style>
+    :root {
+      --pad: 20px;
+      --border-color: #fff;
+      --text-color: #eee;
+      --subtext-color: #ccc;
+      --card-bg: #111;
+      --card-border: #555;
+      --hr-color: #444;
+      --footer-bg: #000;
+      --footer-border: #fff;
+      --link-bg: #111;
+      --link-color: #eee;
+      --link-hover-bg: #eee;
+      --link-hover-color: #000;
+    }
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      color: #eee;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--footer-bg);
+      border-top: 1px solid var(--footer-border);
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-color);
+      padding: 12px 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      user-select: none;
+      z-index: 9999;
+    }
+    footer a {
+      border: 1px solid var(--footer-border);
+      padding: 6px 14px;
+      box-shadow: 2px 2px 0 var(--footer-border);
+      background: var(--link-bg);
+      color: var(--link-color);
+      text-decoration: none;
+      font-weight: 400;
+      font-family: 'EB Garamond', serif;
+    }
+    footer a:hover,
+    footer a:focus-visible {
+      background: var(--link-hover-bg);
+      color: var(--link-hover-color);
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/satellite.js/dist/satellite.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.110.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.110.0/examples/js/loaders/DRACOLoader.js"></script>
+
+  <script type="module">
+    import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/controls/OrbitControls.js";
+
+    // ────── CONSTANTS ──────────────────────────────────────────────────────────
+    const EARTH_RADIUS    = 6371;
+    const SCALE_FACTOR    = 0.01;
+    const SCALE_FACTOR_Z  = 0.015;
+    const TLE_API_URL     = 'https://tle.ivanstanojevic.me/api/tle/58924';
+
+    // [ id, latitude, longitude, timestampString ]
+    const localAssets = [
+      ['C1',  34.2655,   108.8955,  '2025-01-30T09:31:00Z'],
+      ['C2',  31.3896,   121.5225,  '2024-12-19T06:24:00Z'],
+      ['C4',  13.743853, 100.589287, '2024-11-13T02:41:00Z'],
+      ['C10', 22.855908, 106.724137, '2024-08-23T04:39:00Z'],
+      ['C12', 31.272038, 121.555763, '2024-08-03T10:08:00Z'],
+      ['C14', 31.192763, 121.299422, '2024-04-13T12:56:00Z'],
+      ['C17', 34.302837, 117.290383, '2024-02-15T04:09:00Z'],
+      ['C18', 34.232463, 109.122156, '2024-02-13T07:21:00Z'],
+      ['C19', 22.282508, 114.191162, '2024-01-30T02:20:00Z'],
+      ['C24', 18.799705,  98.939112, '2024-01-05T10:45:00Z'],
+      ['C27', 20.350608, 100.082856, '2024-01-03T08:47:00Z'],
+      ['C28', 19.912762,  99.824487, '2024-01-02T10:25:00Z'],
+      ['C30', 18.796292,  98.982978, '2024-01-01T09:19:00Z'],
+      ['P2',  44.91871399, -73.12477538, '07/27/24 10:23 PM'],
+      ['P4',  44.97115405, -72.89641591, '08/25/2024 6:04 PM'],
+      ['P7',  13.75,       100.49,       '02/02/24 12:00 PM'],
+      ['P8',  46.813,     -71.2,        '10/20/2024 2:31 PM'],
+      ['P10', 49.28,     -123.105,      '11/02/2024 4:30 PM'],
+      ['P11', 45.54,      -73.58,        '01/12/25 10:00 AM'],
+    ];
+
+    // ────── UTILITY FUNCTIONS ──────────────────────────────────────────────────
+    function degreesToRadians(deg) {
+      return (deg * Math.PI) / 180;
+    }
+    function convertLatLongTo3D(lat, lon, scale = SCALE_FACTOR) {
+      const phi   = degreesToRadians(90 - lat);
+      const theta = degreesToRadians(-lon);
+      return {
+        x: EARTH_RADIUS * Math.sin(phi) * Math.cos(theta) * scale,
+        y: EARTH_RADIUS * Math.cos(phi)              * scale,
+        z: EARTH_RADIUS * Math.sin(phi) * Math.sin(theta) * scale,
+      };
+    }
+
+    // ────── ECI CACHE LOADER ────────────────────────────────────────────────────
+    let eciCache = null;
+    async function loadECICache() {
+      if (!eciCache) {
+        const res = await fetch('eci-cache.json');
+        eciCache   = await res.json();
+      }
+    }
+    async function fetchSatelliteECIForTime(time, id) {
+      await loadECICache();
+      const cached = eciCache[id];
+      if (!cached) throw new Error(`ECI not found for ${id}`);
+      return cached;
+    }
+
+    // ────── THREE.JS SETUP ─────────────────────────────────────────────────────
+    const raycaster  = new THREE.Raycaster();
+    const mouse      = new THREE.Vector2();
+    const clickableObjects = [];
+
+    // We’ll keep a simple array of every triangle we create:
+    const allTriangles = [];
+
+    // But also retain a quick Map from each “clickable mesh UUID” → the triangle it belongs to,
+    // so that your existing onClick code can still highlight via a click.
+    const trianglesByObjectId = new Map();
+    let highlightedTriangle   = null;
+
+    const scene    = new THREE.Scene();
+    const camera   = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 10000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const sceneGroup = new THREE.Group();
+    scene.add(sceneGroup);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(10, 10, 10);
+    directionalLight.castShadow = true;
+    scene.add(directionalLight);
+
+    const ambientLight = new THREE.AmbientLight(0x888888);
+    scene.add(ambientLight);
+    renderer.shadowMap.enabled = true;
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping   = true;
+    controls.dampingFactor   = 0.25;
+    camera.position.z        = EARTH_RADIUS * 5 * SCALE_FACTOR;
+
+    const textureLoader = new THREE.TextureLoader();
+    const coolearthTexture = textureLoader.load(
+      'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_bump_roughness_clouds_4096.jpg'
+    );
+    const specularMap = textureLoader.load(
+      'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_specular_2048.jpg'
+    );
+    const cloudTexture = textureLoader.load(
+      'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_clouds_1024.png'
+    );
+
+    const earthMat = new THREE.MeshStandardMaterial({
+      map: coolearthTexture,
+      bumpMap: specularMap,
+      bumpScale: 0.05,
+      metalness: 0.4,
+      roughness: 0.9,
+      transparent: true,
+      opacity: 0.97
+    });
+    const earthGeo = new THREE.SphereGeometry(EARTH_RADIUS * SCALE_FACTOR, 64, 64);
+    const earthMesh = new THREE.Mesh(earthGeo, earthMat);
+    sceneGroup.add(earthMesh);
+
+    // Clouds (slightly larger sphere, semi-transparent)
+    const cloudGeo = new THREE.SphereGeometry(EARTH_RADIUS * SCALE_FACTOR * 1.01, 64, 64);
+    const cloudMat = new THREE.MeshLambertMaterial({
+      map: cloudTexture,
+      transparent: true,
+      opacity: 0.84,
+      depthWrite: true,
+    });
+    const cloudMesh = new THREE.Mesh(cloudGeo, cloudMat);
+    cloudMesh.renderOrder = 1;
+    sceneGroup.add(cloudMesh);
+    cloudMesh.rotation.y += 1;
+
+    // ────── SCENE HELPERS ──────────────────────────────────────────────────────
+    function addPoint(pos, color = 0xff0000) {
+      const geo = new THREE.SphereGeometry(50 * SCALE_FACTOR, 16, 16);
+      const mat = new THREE.MeshBasicMaterial({ color });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(pos.x, pos.y, pos.z);
+      sceneGroup.add(mesh);
+      clickableObjects.push(mesh);
+      return mesh;
+    }
+
+    async function addImagePlane(pos, url) {
+      const loader = new THREE.TextureLoader();
+      const texture = await new Promise((resolve, reject) => {
+        loader.load(url, resolve, undefined, reject);
+      });
+      texture.minFilter = THREE.LinearFilter;
+      texture.generateMipmaps = false;
+
+      const geo = new THREE.PlaneGeometry(700 * SCALE_FACTOR, 1000 * SCALE_FACTOR);
+      const mat = new THREE.MeshBasicMaterial({
+        map: texture,
+        side: THREE.DoubleSide,
+        transparent: true,
+        depthWrite: false,
+        depthTest: false
+      });
+      const plane = new THREE.Mesh(geo, mat);
+      plane.position.set(pos.x, pos.y, pos.z);
+      plane.lookAt(camera.position);
+      plane.renderOrder = 1;
+      sceneGroup.add(plane);
+    }
+
+    function addLine(start, end, color = 0xffffff) {
+      const points = [
+        new THREE.Vector3(start.x, start.y, start.z),
+        new THREE.Vector3(end.x,   end.y,   end.z)
+      ];
+      const geo = new THREE.BufferGeometry().setFromPoints(points);
+      const mat = new THREE.LineBasicMaterial({
+        color,
+        transparent: true,
+        opacity: 0.30,
+        depthWrite: false,
+        depthTest: false
+      });
+      const line = new THREE.Line(geo, mat);
+      line.renderOrder = 2;
+      sceneGroup.add(line);
+    }
+
+    function addTriangle(a, b, c, color = 0xffffff) {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute(
+        'position',
+        new THREE.Float32BufferAttribute([
+          a.x, a.y, a.z,
+          b.x, b.y, b.z,
+          c.x, c.y, c.z
+        ], 3)
+      );
+      const mat = new THREE.MeshBasicMaterial({
+        color,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.1,
+        depthWrite: false,
+        depthTest: false,
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.renderOrder = 22;
+      sceneGroup.add(mesh);
+      return mesh;
+    }
+
+    function createTextLabel(text) {
+      const canvas = document.createElement('canvas');
+      const ctx    = canvas.getContext('2d');
+      canvas.width  = 256;
+      canvas.height = 64;
+      ctx.fillStyle = 'white';
+      ctx.font      = '20px Arial';
+      ctx.fillText(text, 10, 40);
+      const texture = new THREE.CanvasTexture(canvas);
+      const spriteMat = new THREE.SpriteMaterial({ map: texture });
+      const sprite = new THREE.Sprite(spriteMat);
+      sprite.scale.set(300 * SCALE_FACTOR, 75 * SCALE_FACTOR, 1);
+      return sprite;
+    }
+
+    // ────── SATELLITE MODEL LOADER ─────────────────────────────────────────────
+    let satelliteModel = null;
+    const dracoLoader  = new THREE.DRACOLoader();
+    dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.110.0/examples/js/libs/draco/');
+    const gltfLoader   = new THREE.GLTFLoader();
+    gltfLoader.setDRACOLoader(dracoLoader);
+
+    // We’ll load SAC-C once at startup.  If it fails, we just fall back to a colored point.
+    gltfLoader.load(
+      'SAC-C.glb',
+      (gltf) => {
+        satelliteModel = gltf.scene;
+        satelliteModel.scale.set(0.3, 0.3, 0.3);
+      },
+      undefined,
+      (error) => {
+        console.warn('Warning: Failed to load SAC-C model. Using points instead.', error);
+      }
+    );
+
+    // ────── PLOT ALL ASSETS (ASYNC) ────────────────────────────────────────────
+    async function plotAssetsWithSatellite() {
+      let previousUserPos = null;
+
+      for (const [id, lat, lon, time] of localAssets) {
+        const userECI   = convertLatLongTo3D(lat, lon);
+        const imageUrl  = `assets/${id.toUpperCase()}/${id.toLowerCase()}.png`;
+
+        try {
+          const satelliteECI = await fetchSatelliteECIForTime(time, id);
+          const userPointMesh = addPoint(userECI, 0xff0000);
+
+          // If satelliteModel has loaded, clone it; otherwise draw a cyan point
+          let satelliteMesh;
+          if (satelliteModel) {
+            satelliteMesh = satelliteModel.clone();
+            satelliteMesh.traverse(obj => {
+              if (obj.isMesh) {
+                obj.castShadow    = true;
+                obj.receiveShadow = true;
+                clickableObjects.push(obj);
+              }
+            });
+            satelliteMesh.position.set(satelliteECI.x, satelliteECI.y, satelliteECI.z);
+            sceneGroup.add(satelliteMesh);
+          } else {
+            satelliteMesh = addPoint(satelliteECI, 0x00ffff);
+          }
+
+          // Show the asset’s thumbnail
+          await addImagePlane(userECI, imageUrl);
+
+          // Put a timestamp label above the user point
+          const label = createTextLabel(time);
+          label.position.set(userECI.x, userECI.y + 0.3, userECI.z);
+          sceneGroup.add(label);
+
+          // If we already had a “previousUserPos,” then form a triangle
+          if (previousUserPos) {
+            const triMesh = addTriangle(previousUserPos, userECI, satelliteECI, 0xffffff);
+            if (triMesh) {
+              // 1) Push into our master array
+              allTriangles.push(triMesh);
+
+              // 2) Also register each “clickable child” → this triangle,
+              //    so that clicks still highlight it:
+              trianglesByObjectId.set(userPointMesh.uuid, triMesh);
+              satelliteMesh.traverse(obj => {
+                if (obj.isMesh) {
+                  trianglesByObjectId.set(obj.uuid, triMesh);
+                }
+              });
+            }
+
+            // Draw the three edges in faint lines:
+            addLine(previousUserPos, userECI,    0xff0000);
+            addLine(userECI,          satelliteECI, 0xffffff);
+            addLine(previousUserPos,  satelliteECI, 0x00ffff);
+          }
+
+          // Advance “previousUserPos” for the next loop iteration
+          previousUserPos = userECI;
+        } catch (err) {
+          console.warn(`Skipped asset ${id} due to error:`, err);
+        }
+      }
+    }
+
+    // ────── BOUNDARIES (UNCHANGED) ─────────────────────────────────────────────
+    async function loadGeoJSON(url) {
+      const res = await fetch(url);
+      return res.json();
+    }
+    function convertGeoJSONTo3D(coords) {
+      return coords.map(([lon, lat]) => convertLatLongTo3D(lat, lon));
+    }
+    async function drawBoundaries(urls) {
+      for (const url of urls) {
+        try {
+          const geojson = await loadGeoJSON(url);
+          geojson.features.forEach(feature => {
+            const group = new THREE.Group();
+            const { type, coordinates } = feature.geometry;
+            const material = new THREE.LineBasicMaterial({
+              color: 0x8888ff,
+              transparent: true,
+              opacity: 0.3,
+              depthWrite: false,
+              depthTest: false
+            });
+            const addLine = (pointsArray, isLoop = false) => {
+              const points = convertGeoJSONTo3D(pointsArray);
+              const geometry = new THREE.BufferGeometry().setFromPoints(points);
+              const line = isLoop
+                ? new THREE.LineLoop(geometry, material)
+                : new THREE.Line(geometry, material);
+              line.renderOrder = 999;
+              group.add(line);
+            };
+            if (type === 'LineString') {
+              addLine(coordinates);
+            } else if (type === 'MultiLineString') {
+              coordinates.forEach(line => addLine(line));
+            } else if (type === 'Polygon') {
+              // Each “ring” of coordinates should be drawn as a loop
+              coordinates.forEach(ring => addLine(ring, true));
+            }
+            sceneGroup.add(group);
+          });
+        } catch (e) {
+          console.warn('GeoJSON load error:', url, e);
+        }
+      }
+    }
+
+    // ────── TRIANGLE ANIMATION ─────────────────────────────────────────────────
+    // Call this only *after* allTriangles[] is populated.
+    function startTriangleAnimation() {
+  if (allTriangles.length === 0) return;
+
+  // 1) Reset every triangle to white + opacity = 0.1
+  allTriangles.forEach(tri => {
+    tri.material.color.set(0xffffff);
+    tri.material.opacity = 0.1;
+  });
+
+  // 2) Highlight the first triangle (index 0)
+  let currentIndex = 0;
+  allTriangles[currentIndex].material.color.set(0xffff00);
+  allTriangles[currentIndex].material.opacity = 0.6;
+
+  // 3) Define a self‐scheduling function that:
+  //    • Resets the old triangle
+  //    • Advances the index
+  //    • Picks a random color for the new triangle
+  //    • Waits a random 100–1500ms before calling itself again
+  function nextHighlight() {
+    // Reset the “old” triangle
+    const oldTri = allTriangles[currentIndex];
+    oldTri.material.color.set(0xffffff);
+    oldTri.material.opacity = 0.1;
+
+    // Advance index
+    currentIndex = (currentIndex + 1) % allTriangles.length;
+
+    // Highlight the “new” triangle with a random color
+    const newTri = allTriangles[currentIndex];
+    const randomHex = Math.floor(Math.random() * 0xffffff); // 0x000000 .. 0xFFFFFF
+    newTri.material.color.setHex(randomHex);
+    newTri.material.opacity = 0.6;
+
+    // Schedule the next call after a random delay (100ms to 1500ms)
+    const randomDelay = Math.random() * (1000 - 100) + 100; // → [100, 1500)
+    setTimeout(nextHighlight, randomDelay);
+  }
+
+  // 4) Kick off the loop by calling nextHighlight once, after a random delay
+  const initialDelay = Math.random() * (1000 - 100) + 100;
+  setTimeout(nextHighlight, initialDelay);
+}
+
+    // ────── MAIN INITIALIZATION ────────────────────────────────────────────────
+    (async () => {
+      // 1) Plot all assets (points, lines, triangles, images, labels).
+      //    We await this so that `allTriangles[]` is fully populated
+      //    before we ever call `startTriangleAnimation()`.
+      await plotAssetsWithSatellite();
+
+      // 2) Now that every triangle exists, start the “yellow highlight” loop.
+      startTriangleAnimation();
+
+      // 3) Draw your boundaries
+      drawBoundaries(['cable-geo.json']);
+    })();
+
+    // ────── RENDER LOOP ────────────────────────────────────────────────────────
+    function animate() {
+      requestAnimationFrame(animate);
+      sceneGroup.rotation.y += 0.0005;
+      sceneGroup.rotation.z += 0.0001;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // ────── CLICK HANDLER (UNCHANGED) ───────────────────────────────────────────
+    window.addEventListener('click', onClick, false);
+    function onClick(event) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+
+      const intersects = raycaster.intersectObjects(clickableObjects);
+      if (intersects.length > 0) {
+        const clicked = intersects[0].object;
+        if (highlightedTriangle) {
+          highlightedTriangle.material.color.set(0xffffff);
+          highlightedTriangle.material.opacity = 0.1;
+        }
+        const triangle = trianglesByObjectId.get(clicked.uuid);
+        if (triangle) {
+          triangle.material.color.set(0xffff00);
+          triangle.material.opacity = 0.6;
+          highlightedTriangle = triangle;
+        }
+      }
+    }
+  </script>
+
+  <footer>
+    <a href="./registry.html">REGISTRY</a>
+    <a href="globe.html">MAP</a>
+    <a href="./version1/index_version1.html">UPDATES</a>
+    <a href="./index.html">ABOUT</a>
+  </footer>
+</body>
+</html>
