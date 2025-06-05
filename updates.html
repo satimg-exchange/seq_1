@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Subscribe – Satellite Image Exchange</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=EB+Garamond&display=swap');
+
+    :root {
+      --pad: 20px;
+      --border-color: #fff;
+      --text-color: #eee;
+      --subtext-color: #ccc;
+      --section-bg: #111;
+      --hr-color: #444;
+      --footer-bg: #000;
+      --footer-border: #fff;
+      --link-bg: #111;
+      --link-color: #eee;
+      --link-hover-bg: #eee;
+      --link-hover-color: #000;
+    }
+
+    /* Reset */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 60px 40px 120px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+      font-family: 'helvetica', serif;
+      font-size: 18px;
+      line-height: 1.6;
+      background: #000;
+      color: var(--text-color);
+      position: relative;
+      text-align: center;
+    }
+
+    /* Top/bottom white borders */
+    body::before, body::after {
+      content: "";
+      position: fixed;
+      left: 0;
+      width: 100vw;
+      height: 1px;
+      background: var(--border-color);
+      pointer-events: none;
+      user-select: none;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after  { bottom: 0; }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 0 var(--pad);
+    }
+
+    header h1 {
+      font-size: 3rem;
+      margin: 0;
+      color: var(--text-color);
+      line-height: 1.2;
+    }
+
+    header h2 {
+      font-size: 1.5rem;
+      margin: 8px 0;
+      color: var(--subtext-color);
+      line-height: 1.3;
+    }
+
+    header .dates {
+      font-size: 1.2rem;
+      color: var(--subtext-color);
+      margin-top: 8px;
+    }
+
+    /* Subscribe button styling */
+    .subscribe-button {
+      display: inline-block;
+      margin: 50px auto;
+      padding: 14px 28px;
+      border: 1px solid var(--footer-border);
+      background: var(--link-bg);
+      color: var(--link-color);
+      text-decoration: none;
+      font-family: 'EB Garamond', serif;
+      font-size: 1rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .subscribe-button:hover,
+    .subscribe-button:focus {
+      background: var(--link-hover-bg);
+      color: var(--link-hover-color);
+      outline: none;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--footer-bg);
+      border-top: 1px solid var(--footer-border);
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-color);
+      padding: 12px 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      user-select: none;
+      z-index: 9999;
+      flex-wrap: wrap;
+      text-align: center;
+    }
+
+    footer a {
+      border: 1px solid var(--footer-border);
+      padding: 6px 14px;
+      box-shadow: 2px 2px 0 var(--footer-border);
+      background: var(--link-bg);
+      color: var(--link-color);
+      text-decoration: none;
+      font-weight: 400;
+      font-family: 'EB Garamond', serif;
+      margin: 4px 2px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    footer a:hover,
+    footer a:focus-visible {
+      background: var(--link-hover-bg);
+      color: var(--link-hover-color);
+      outline: none;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 600px) {
+      body {
+        padding: 40px 20px 100px;
+      }
+      header h1 {
+        font-size: 2rem;
+      }
+      header h2 {
+        font-size: 1.2rem;
+      }
+      header .dates {
+        font-size: 1rem;
+      }
+      .subscribe-button {
+        margin: 40px auto;
+        padding: 12px 24px;
+        font-size: 0.9rem;
+      }
+      footer {
+        position: static;
+        padding: 10px 0;
+      }
+      footer a {
+        padding: 4px 10px;
+        font-size: 0.8rem;
+        margin: 2px 1px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Satellite Image Exchange</h1>
+    <h2>The Terminal Vision</h2>
+    <div class="dates">2025</div>
+  </header>
+
+  <a
+    href="https://lianas.nohost.me/subscription/form"
+    class="subscribe-button"
+    target="_blank"
+    rel="noopener"
+  >
+    Subscribe
+  </a> ...
+  <a
+  href="./version1/index_version1.html"
+  class="subscribe-button"
+>
+  WorkSpace / Versions
+</a>
+
+  <footer>
+    <a href="registry.html">REGISTRY</a>
+    <a href="./globe.html">MAP</a>
+    <a href="./methodology.html">METHODOLOGY</a>
+    <a href="./updates.html">UPDATES</a>
+    <a href="./index.html">ABOUT</a>
+  </footer>
+  <br /><br />
+  <div style="text-align:center; margin-bottom: 40px; color: var(--subtext-color); font-size: 0.8rem;">
+    © hua xi zi & patrick o’shea
+  </div>
+</body>
+</html>
