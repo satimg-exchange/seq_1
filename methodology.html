@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Satellite Image Exchange – Home</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=EB+Garamond&display=swap');
+
+    :root {
+      --pad: 20px;
+      --border-color: #fff;
+      --text-color: #eee;
+      --subtext-color: #ccc;
+      --section-bg: #111;
+      --hr-color: #444;
+      --footer-bg: #000;
+      --footer-border: #fff;
+      --link-bg: #111;
+      --link-color: #eee;
+      --link-hover-bg: #eee;
+      --link-hover-color: #000;
+    }
+
+    /* Reset */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 60px 40px 120px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+      font-family: 'helvetica', serif;
+      font-size: 18px;
+      line-height: 1.6;
+      background: #000;
+      color: var(--text-color);
+      position: relative;
+    }
+
+    /* Top/bottom white borders */
+    body::before, body::after {
+      content: "";
+      position: fixed;
+      left: 0;
+      width: 100vw;
+      height: 1px;
+      background: var(--border-color);
+      pointer-events: none;
+      user-select: none;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after  { bottom: 0; }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    header h1 {
+      font-size: 3rem;
+      margin: 0;
+      color: var(--text-color);
+    }
+
+    header h2 {
+      font-size: 1.5rem;
+      margin: 8px 0;
+      color: var(--subtext-color);
+    }
+
+    header .dates {
+      font-size: 1.2rem;
+      color: var(--subtext-color);
+      margin-top: 8px;
+    }
+/* CSS */
+.gif-wrapper {
+  width: 100%;
+  max-width: 900px;
+  height: auto;       /* adjust as needed to “crop” the bottom */
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.hero-gif {
+  width: 100%;
+  display: block;
+  /* optionally shift the image up/down: */
+  /* object-position: 0 -50px; */
+}
+
+.gif-caption {
+  text-align: center;
+  margin-top: -48px;
+  color: var(--subtext-color);
+  font-size: 0.9rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+    section {
+      margin-bottom: 50px;
+    }
+
+    section h2 {
+      font-size: 1.75rem;
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      color: var(--text-color);
+    }
+
+    section p {
+      margin-bottom: 1em;
+      color: var(--text-color);
+    }
+
+    .image-inline {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      border: 1px solid var(--hr-color);
+    }
+
+    .image-row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin: 20px auto;
+    position: relative;
+  }
+  .image-row img {
+    width: 48%;
+    border: 1px solid var(--hr-color);
+  }
+  .overlay-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #000000;    /* white background */
+    color: #ffffff;               /* black text */
+    font-size: 1.2rem;
+    text-align: center;
+    padding: 0.5em 1em;
+    pointer-events: none;
+    white-space: nowrap;
+    border-radius: 4px;
+  }
+
+    .reference-list {
+      font-size: 0.95rem;
+      margin-top: 40px;
+      border-top: 1px solid var(--hr-color);
+      padding-top: 20px;
+      color: var(--subtext-color);
+    }
+
+    .reference-list li {
+      margin-bottom: 8px;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--footer-bg);
+      border-top: 1px solid var(--footer-border);
+      font-family: 'EB Garamond', serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-color);
+      padding: 12px 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      user-select: none;
+      z-index: 9999;
+    }
+
+    footer a {
+      border: 1px solid var(--footer-border);
+      padding: 6px 14px;
+      box-shadow: 2px 2px 0 var(--footer-border);
+      background: var(--link-bg);
+      color: var(--link-color);
+      text-decoration: none;
+      font-weight: 400;
+      font-family: 'EB Garamond', serif;
+    }
+
+    footer a:hover,
+    footer a:focus-visible {
+      background: var(--link-hover-bg);
+      color: var(--link-hover-color);
+      outline: none;
+    }
+  </style>
+  </head>
+<body>
+  <header>
+    <h1>Satellite Image Exchange</h1>
+    <h2>The Terminal Vision</h2>
+    <div class="dates">2025</div>
+  </header>
+
+  <section><br>
+    <h1>Methodology</h1>
+    <h2>From Horizontal Photographs to Vertical Satellite Imagery Network</h2>
+    <p>
+      We usually share pieces of our visions from and of the world with our mobile devices via the internet, which are also horizontal visions emitting into the world. Each of our uploaded photographic image captures is a pixel that makes up how our world and planet looks horizontally on the micro scale, while the satellite image is the vertical vision of our world and planet on the macro scale. Each of our horizontal photographic captures is now to be exchanged for a vertical satellite vision. We upload and share photographs we have captured from our daily lives with each other, starting to weave an image network that links Shanghai and Montreal, streets in Southeast Asia and towns in Northeast America…
+    </p><br>
+    <!-- Example placeholder for an inline image in this section -->
+    <div class="image-row">
+      <img src="assets/c17/c17.png" alt="Horizontal to Vertical Process Illustration" />
+      <img src="assets/c17/c17-map.png" alt="Horizontal to Vertical Process Illustration" />
+      <img src="assets/c17/c17-o10-satellite_image_of_oil_flooding.jpg" alt="Alternate View of Horizontal to Vertical Process" />
+    </div>  
+    <div class="image-row">
+        <img src="assets/p8/p8.png" alt="Horizontal to Vertical Process Illustration" />
+        <img src="assets/p8/p8-map.png" alt="Horizontal to Vertical Process Illustration" />
+        <img src="assets/p8/p8-o8-flooded_city_stuck.jpg" alt="Alternate View of Horizontal to Vertical Process" />
+      </div> 
+</section>
+
+  <section><br>
+    <h2>Image Metadata</h2>
+    <p>
+      Whenever a computational photograph is captured by our mobile devices, the metadata of each image will instantly be recorded for possible image processing, analysis, tracking, training for AI models etc. The image metadata we use for this project include: the timecode and the geographic coordinates (longitude and latitude) of each photo at the moment it is captured. Both the geographic coordinates and timecode have been used to set marks as the gateway to communicate with the satellite. Instead of extracting the metadata, we’re recollecting and reorganizing the time and location of each photographic moment to weave a map of images of our own.
+    </p>
+    <p>
+      <strong>Coordinates:</strong> 31.389600, 121.522500<br />
+      <strong>Location:</strong> Shanghai, China<br />
+      <strong>Recorded:</strong> 2024-12-19 14:24 GMT+8
+    </p>
+    <!-- Example placeholder for an image of metadata visualization -->
+     <img src="assets/c2/c2.png" alt="Image Metadata Visualization" class="image-inline" />
+  </section>
+
+  <section><br>
+    <h2>Map Tiles</h2>
+    <p>
+      Metadata of each original photographic image (its geolocation coordinates and capturing time) was used to identify a map tile of the image’s location with OpenStreetMap <sup>[2]</sup>. The map is like a virtual portal linking the photographic record of the real world and a satellite projection of a speculative vision—it’s where the horizontal to vertical perspective-change happens. The gesture and perspective of looking at maps resembles the perspective of looking at Earth images monitored by the satellite. And it is not only about looking at, but the process of map-making, including the history of gridding, digging, post-holing, exploring, extracting, manipulating, abusing, overtaking, and controlling, unfolds similar desires in the identifying, classifying, tracking processes when monitoring and surveilling with satellite images. Each map tile provides a reference terrain of the original landscape of each situated photographer’s vision, which will be used to layer the AI-generated satellite imagery with.
+    </p>
+    <!-- Example placeholder for a map tile image -->
+    <!-- <img src="path/to/your/map_tile.jpg" alt="Example Map Tile" class="image-inline" /> -->
+  </section>
+
+  <section><br>
+    <h2>Labeling</h2>
+    <p>
+      Labeling therefore has been crucial in identifying landscapes and targeting objects in processing satellite imagery. We labeled each image with our self-defined classification labels (in response to the labeling process of satellite imagery used by monitoring institutions), such as Heavy Machinery Ocean Resort Capitalism,” “Ice City Depression,” “Religious City Corporation,” and “Lonely Single House Post Oceans” in these cases below. We’re self-defining “classifications” and “labels” to each photographic image in order to reverse generate the landscape we wish to see. As we describe and label each image we’ve taken, we’re redefining what the seemingly “neutral” camera machine has captured, infused now with our own emotional and subjective speculations. It’s a process of interpreting, pausing, and reinterpreting.
+    </p><br>
+    <!-- Example placeholder for a labeled image -->
+    <div class="image-row">
+        <img src="assets/c1/c1.png" alt="Labeled Photograph Example 1" />
+        <img src="assets/c1/c1-map.png" alt="Labeled Photograph Example 1" />
+        <img src="assets/c1/c1-o12-Heavy_machinery_ocean_resort.jpg" alt="Labeled Photograph Example 2" />
+        <div class="overlay-text">Classification: “Heavy Machinery Ocean Resort Capitalism”</div>
+      </div> 
+      <div class="image-row">
+        <img src="assets/p11/p11.png" alt="Labeled Photograph Example 1" />
+        <img src="assets/p11/p11-map.png" alt="Labeled Photograph Example 1" />
+        <img src="assets/p11/p11-o9-ice_city.jpg" alt="Labeled Photograph Example 2" />
+        <div class="overlay-text">Classification: “Ice City Depression”</div>
+      </div>
+      <div class="image-row">
+        <img src="assets/c30/c30.png" alt="Labeled Photograph Example 1" />
+        <img src="assets/c30/c30-map.png" alt="Labeled Photograph Example 1" />
+        <img src="assets/c30/c30-o5-religous_city_corporate.jpg" alt="Labeled Photograph Example 2" />
+        <div class="overlay-text">Classification: “Religous City Corporation”</div>
+      </div>
+      <div class="image-row">
+        <img src="assets/p4/p4.png" alt="Labeled Photograph Example 1" />
+        <img src="assets/p4/p4-map.png" alt="Labeled Photograph Example 1" />
+        <img src="assets/p4/p4-o16-single_house.jpg" alt="Labeled Photograph Example 2" />
+        <div class="overlay-text">Classification: “Lonely Single House Post Oceans”</div>
+      </div>
+     </section>
+
+  <section><br>
+    <h2>AI Imagery Generation</h2>
+    <p>
+      With the labels, we created AI-generated satellite images with an open-source model called GeoSynth <sup>[3]</sup>, to replace each respective map tile and geographic region with the context and visions seen from each original photograph. GeoSynth is a suite of ControlNet adapters fine-tuned on Stable Diffusion, enabling the generation of high-resolution satellite images conditioned on OpenStreetMap map tiles. It offers us a great tool and thinking model to reverse construct satellite images based on fictional labels and terrain spatial layout references. Working with GeoSynth’s database also leads us to access preexisting categories of what “satellite images” have been about, such as “city,” “factory,” “military camp,” “farmland” (sample reference prompts from GeoSynth). We’re now able to reconstruct an uncannily realistic landscape, with slight touches of the imaginative and fantasized views, as if it is really seen from the satellite’s eyes.
+    </p>
+    <p>
+      One image from the variations of the satellite image was selected to generate an expanded video clip using Runway Gen-4. Each satellite video hovers and pans across the Earth.
+    </p>
+    <!-- Example placeholder for a GeoSynth-generated satellite image -->
+    <img src="assets/c18/Nested Sequence 01_2.gif" alt="GeoSynth Satellite Example" /> 
+  </section>
+
+  <section>
+    <p>
+      The decay and change we see in the real landscape are also mediations of planetary computation haunted by our desire, memory, fear, and power, generated in emotion and contemplation. Evolutions of both vertical image-surveilling and horizontal image-capturing are mediating into more complex satellite visions which we are all entangled in. In The Terminal Vision, we’re displaying our concern and calling for the climate, about the capitalistic extractions, evolving consequences of human conflicts, inevitably advancement of technological acceleration…
+    </p>
+    <!-- Example placeholder for a final montage or video still -->
+    <!-- <img src="path/to/your/final_montage.jpg" alt="Final Montage Shot" class="image-inline" /> -->
+  </section>
+  <ul class="reference-list">
+    <li><strong>[2]</strong> OpenStreetMap: <a href="https://www.openstreetmap.org" target="_blank" rel="noopener" style="color: var(--link-color);">https://www.openstreetmap.org</a></li>
+    <li><strong>[3]</strong> S. Sastry, S. Khanal, A. Dhakal, and N. Jacobs, “GeoSynth: Contextually-Aware High-Resolution Satellite Image Synthesis,” in <em>Proc. IEEE/ISPRS Workshop: Large Scale Computer Vision for Remote Sensing (EARTHVISION), 2024</em>.</li>
+  </ul>
+
+
+  <footer>
+    <a href="registry.html">REGISTRY</a>
+    <a href="./globe.html">MAP</a>
+    <a href="./methodology.html">METHODOLOGY</a>
+    <a href="./version1/index_version1.html">UPDATES</a>
+    <a href="./index.html">ABOUT</a>
+  </footer>
+  <br><br><div>© hua xi zi & patrick o’shea</div>
+</body>
+</html>

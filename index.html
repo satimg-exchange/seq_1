@@ -57,18 +57,21 @@
     header {
       text-align: center;
       margin-bottom: 40px;
+      padding: 0 var(--pad);
     }
 
     header h1 {
       font-size: 3rem;
       margin: 0;
       color: var(--text-color);
+      line-height: 1.2;
     }
 
     header h2 {
       font-size: 1.5rem;
       margin: 8px 0;
       color: var(--subtext-color);
+      line-height: 1.3;
     }
 
     header .dates {
@@ -76,34 +79,34 @@
       color: var(--subtext-color);
       margin-top: 8px;
     }
-/* CSS */
-.gif-wrapper {
-  width: 100%;
-  max-width: 900px;
-  height: auto;       /* adjust as needed to “crop” the bottom */
-  overflow: hidden;
-  margin: 0 auto;
-}
 
-.hero-gif {
-  width: 100%;
-  display: block;
-  /* optionally shift the image up/down: */
-  /* object-position: 0 -50px; */
-}
+    .gif-wrapper {
+      width: 100%;
+      max-width: 900px;
+      height: auto;
+      overflow: hidden;
+      margin: 0 auto 20px;
+    }
 
-.gif-caption {
-  text-align: center;
-  margin-top: -48px;
-  color: var(--subtext-color);
-  font-size: 0.9rem;
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
-}
+    .hero-gif {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .gif-caption {
+      text-align: center;
+      margin-top: -48px;
+      color: var(--subtext-color);
+      font-size: 0.9rem;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
 
     section {
       margin-bottom: 50px;
+      padding: 0 var(--pad);
     }
 
     section h2 {
@@ -118,38 +121,54 @@
       color: var(--text-color);
     }
 
-    .image-inline {
-      display: block;
-      max-width: 100%;
-      height: auto;
-      border: 1px solid var(--hr-color);
-    }
+/* This now applies only to the <img> */
+.image-inline {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 10px auto;
+}
+
+/* The <figure> itself has no border */
+.image-wrapper {
+  margin: 0 auto 10px;
+  text-align: center; /* center-align caption underneath */
+}
+
+/* Style for the caption (no border) */
+.image-credit {
+  margin-top: 8px;
+  color: var(--subtext-color);
+  font-size: 0.9rem;
+}
+
 
     .image-row {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    margin: 20px auto;
-    position: relative;
-  }
-  .image-row img {
-    width: 48%;
-    border: 1px solid var(--hr-color);
-  }
-  .overlay-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #000000;    /* white background */
-    color: #ffffff;               /* black text */
-    font-size: 1.2rem;
-    text-align: center;
-    padding: 0.5em 1em;
-    pointer-events: none;
-    white-space: nowrap;
-    border-radius: 4px;
-  }
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin: 20px auto;
+      position: relative;
+      flex-wrap: wrap;
+    }
+    .image-row img {
+      width: 48%;
+      border: 1px solid var(--hr-color);
+    }
+    .overlay-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #000000;
+      color: #ffffff;
+      font-size: 1.2rem;
+      text-align: center;
+      padding: 0.5em 1em;
+      pointer-events: none;
+      white-space: nowrap;
+      border-radius: 4px;
+    }
 
     .reference-list {
       font-size: 0.95rem;
@@ -157,6 +176,7 @@
       border-top: 1px solid var(--hr-color);
       padding-top: 20px;
       color: var(--subtext-color);
+      padding: 0 var(--pad);
     }
 
     .reference-list li {
@@ -181,6 +201,8 @@
       gap: 20px;
       user-select: none;
       z-index: 9999;
+      flex-wrap: wrap;
+      text-align: center;
     }
 
     footer a {
@@ -192,6 +214,7 @@
       text-decoration: none;
       font-weight: 400;
       font-family: 'EB Garamond', serif;
+      margin: 4px 2px;
     }
 
     footer a:hover,
@@ -200,154 +223,214 @@
       color: var(--link-hover-color);
       outline: none;
     }
+
+    #random-dashes {
+      display: inline-block;
+      font-family: monospace;
+      white-space: nowrap;
+    }
+    /* Mobile adjustments */
+    @media (max-width: 600px) {
+      body {
+        padding: 40px 20px 100px;
+      }
+      header h1 {
+        font-size: 2rem;
+      }
+      header h2 {
+        font-size: 1.2rem;
+      }
+      header .dates {
+        font-size: 1rem;
+      }
+      .gif-wrapper {
+        margin-bottom: 15px;
+      }
+      .gif-caption {
+        font-size: 0.8rem;
+        margin-top: -36px;
+      }
+      section {
+        margin-bottom: 30px;
+        padding: 0 10px;
+      }
+      section h2 {
+        font-size: 1.4rem;
+      }
+      section p {
+        font-size: 1rem;
+      }
+      .image-inline {
+        margin: 20px auto;
+      }
+      .image-row img {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+      footer {
+        position: static;
+        padding: 10px 0;
+      }
+      footer a {
+        padding: 4px 10px;
+        font-size: 0.8rem;
+        margin: 2px 1px;
+      }
+    }
   </style>
-  </head>
+</head>
 <body>
   <header>
     <h1>Satellite Image Exchange</h1>
     <h2>The Terminal Vision</h2>
     <div class="dates">2025</div>
   </header>
+
   <div class="gif-wrapper">
-  <img src="tv2.gif" alt="Terminal Vision GIF" class="hero-gif" />
-</div>
+    <img src="tv2.gif" alt="Terminal Vision GIF" class="hero-gif" />
+  </div>
   <div class="gif-caption"></div>
   <div style="text-align: center; margin-top: 8px; color: var(--subtext-color); font-size: 0.9rem;">
     The first sequence of three, from patrick o'shea & hua xi zi <i>Satellite Image Exchange</i> residency on the SCA-1 satellite. Shown here is a GIF of the original sequence, titled <i>The Terminal Vision</i> (2m50s) and is broadcast on the satellite's monitor in Low Earth Orbit, and beamed back to Earth. Credit: Satellite Image Exchange Project, Xu Bing Space Art Residency Program, and SCA-1 (Star Chain of Arts Project).
-  </div><br><br>
+  </div>
+  <br /><br />
+
   <section>
     <p>
       The Terminal Vision <sup>[1]</sup> displays on the screen of SCA-1 a series of moving-images of the Earth landscape looking down from the satellite, as if the SCA Satellite documents what it sees as it slowly hovers across the Low Earth Orbit. The Terminal Vision is a simulated and imagined reality of the Earth seen at planetary scale, or rather this is the visual condition of the Earth we hope us to urgently see and confront today. These are prompted glimpses of city ruins, destructions, flooding, oil spoils, as well as views of temple labs, empty bunkers, man chopping trees, future city resorts…
     </p>
     <p>
-      In this first iteration of the total three-track satellite imagery project, <em>Satellite Image Exchange</em>, the artists generate a series of satellite imagery of their own planetary vision from an archive of still photographs they have captured themselves. Each photographic image is therefore mediated into the artists’ self-defined descriptive prompts and a map tile with the image’s geographic coordinates, before being generated into each Earth landscape still with AI processes.
+      In this first iteration of the total three-track satellite imagery project, Satellite Image Exchange, the artists generate a series of satellite imagery of their own planetary vision from an archive of still photographs they have captured themselves. Each photographic image is therefore mediated into the artists’ self-defined descriptive prompts and a map tile with the image’s geographic coordinates, before being generated into each Earth landscape still with AI processes.
     </p>
     <p>
       This Earth landscape the satellite flies across is synthesized land. Presented in the vertical perspective of satellite imagery, the images are not only merely documentation or monitoring of all conditions of Earth, but they contain complex realities and representation of gaze produced from the past and present “visual machines,” from the tradition of aerial photography, satellite remote sensing, drone footage, to our everyday photographic captures, and generative AI image models. Rather than acquiring data, however, this “art satellite” displaying our work functions as an emissive platform—the resulting AI-generated landscape is a speculative terrain generated by systems designed to reproduce, extract, and simulate. As much as the synthetic landscapes are imagined, they are the most realistic in simultaneously manmade and machine-generated visions.
     </p>
-    <p>The next two sequences, in 2025 and 2026, are titled <i>The Terminal Simulation</i> & <i>The Terminal Erasure</i>.</p>
-    <br><a>hua xi zi & patrick o’shea</a><br>
+    <p>
+      The next two sequences, in 2025 and 2026, are titled <i>The Terminal Simulation</i> & <i>The Terminal Erasure</i>.
+    </p>
   </section>
 
-  <section><br>
-    <h1>Methodology</h1>
-    <h2>Image generation process:<br />
-    From Horizontal Photographs to Vertical Satellite Imagery</h2>
+  <div class="gif-wrapper">
+    <img src="tv3.gif" alt="Satellite Image Exchange – Example GIF" class="hero-gif" />
+  </div><a id="random-dashes">----</a>
+<br><br><br><br><br>
+  <h2 style="text-align:center; margin-top: 30px;">
+    <a href="https://www.xubing.com/en/work/details/718?year=2024&type=year#718" target="_blank">
+      Xu Bing Space Art Residency
+    </a>
+  </h2>
+  <section>
     <p>
-      We usually share pieces of our visions from and of the world with our mobile devices via the internet, which are also horizontal visions emitting into the world. Each of our uploaded photographic image captures is a pixel that makes up how our world and planet looks horizontally on the micro scale, while the satellite image is the vertical vision of our world and planet on the macro scale. Each of our horizontal photographic captures is now to be exchanged for a vertical satellite vision. We upload and share photographs we have captured from our daily lives with each other, starting to weave an image network that links Shanghai and Montreal, streets in Southeast Asia and towns in Northeast America…
-    </p><br>
-    <!-- Example placeholder for an inline image in this section -->
-    <div class="image-row">
-      <img src="assets/c17/c17.png" alt="Horizontal to Vertical Process Illustration" />
-      <img src="assets/c17/c17-map.png" alt="Horizontal to Vertical Process Illustration" />
-      <img src="assets/c17/c17-o10-satellite_image_of_oil_flooding.jpg" alt="Alternate View of Horizontal to Vertical Process" />
-    </div>  
-    <div class="image-row">
-        <img src="assets/p8/p8.png" alt="Horizontal to Vertical Process Illustration" />
-        <img src="assets/p8/p8-map.png" alt="Horizontal to Vertical Process Illustration" />
-        <img src="assets/p8/p8-o8-flooded_city_stuck.jpg" alt="Alternate View of Horizontal to Vertical Process" />
-      </div> 
-</section>
-
-  <section><br>
-    <h2>Image Metadata</h2>
-    <p>
-      Whenever a computational photograph is captured by our mobile devices, the metadata of each image will instantly be recorded for possible image processing, analysis, tracking, training for AI models etc. The image metadata we use for this project include: the timecode and the geographic coordinates (longitude and latitude) of each photo at the moment it is captured. Both the geographic coordinates and timecode have been used to set marks as the gateway to communicate with the satellite. Instead of extracting the metadata, we’re recollecting and reorganizing the time and location of each photographic moment to weave a map of images of our own.
+      Satellite Image Exchange explores planetary projections entangling between photographic captures, satellite remote sensing, machine learning, geospatial map-making, distributed networks, and digital archiving. It is also to build an observation protocol that invites people to share and exchange their imagery visions, making a constantly evolving satellite image body public to all: “What is the world you would like us to see?” Each participation becomes reflective of each other’s geopolitical positions and infrastructural contexts.
     </p>
     <p>
-      <strong>Coordinates:</strong> 31.389600, 121.522500<br />
-      <strong>Location:</strong> 上海，中国<br />
-      <strong>Recorded:</strong> 2024-12-19 14:24 GMT+8
+      This project was initiated and developed as part of the
+      <a href="http://global.cafa.edu.cn/infoDetail/1/324" target="_blank">Star Chain of Arts Project</a>
+      participating in the
+      <a href="https://www.xubing.com/en/work/details/718?year=2024&type=year#718" target="_blank">Xu Bing Space Art Residency</a>.
     </p>
-    <!-- Example placeholder for an image of metadata visualization -->
-     <img src="assets/c2/c2.png" alt="Image Metadata Visualization" class="image-inline" />
-  </section>
-
-  <section><br>
-    <h2>Map Tiles</h2>
+    <figure class="image-wrapper">
+      <img
+        src="sat2.png"
+        alt="Satellite Image Exchange – Example Image"
+        class="image-inline"
+      />
+      <figcaption class="image-credit">
+        Credit: Xu Bing Studio
+      </figcaption>
+    </figure>
     <p>
-      Metadata of each original photographic image (its geolocation coordinates and capturing time) was used to identify a map tile of the image’s location with OpenStreetMap <sup>[2]</sup>. The map is like a virtual portal linking the photographic record of the real world and a satellite projection of a speculative vision—it’s where the horizontal to vertical perspective-change happens. The gesture and perspective of looking at maps resembles the perspective of looking at Earth images monitored by the satellite. And it is not only about looking at, but the process of map-making, including the history of gridding, digging, post-holing, exploring, extracting, manipulating, abusing, overtaking, and controlling, unfolds similar desires in the identifying, classifying, tracking processes when monitoring and surveilling with satellite images. Each map tile provides a reference terrain of the original landscape of each situated photographer’s vision, which will be used to layer the AI-generated satellite imagery with.
+      An evolving image body will be displayed on the SCA-1 satellite screen
+      <a href="https://www.n2yo.com/?s=58924&live=1" target="_blank">(NORAD ID 58924)</a>
+      in three separate tracks, captured by the camera attached to the satellite, offering a planetary-scale broadcast of interconnected visions. A recorded video of the image body displaying on the satellite screen would be sent back to Xu Bing studio and made available for us to publish on our project’s webpage for the public to view. The SCA-1 satellite was launched on February 3, 2024 into Low Earth Orbit near the sea area of Yangjiang, Guangdong, with the Long March 3B carrier rocket.
     </p>
-    <!-- Example placeholder for a map tile image -->
-    <!-- <img src="path/to/your/map_tile.jpg" alt="Example Map Tile" class="image-inline" /> -->
-  </section>
-
-  <section><br>
-    <h2>Labeling</h2>
-    <p>
-      Labeling therefore has been crucial in identifying landscapes and targeting objects in processing satellite imagery. We labeled each image with our self-defined classification labels (in response to the labeling process of satellite imagery used by monitoring institutions), such as “border of Vietnam and China” and “security border” in this case below. We’re self-defining “classifications” and “labels” to each photographic image in order to reverse generate the landscape we wish to see. As we describe and label each image we’ve taken, we’re redefining what the seemingly “neutral” camera machine has captured, infused now with our own emotional and subjective speculations. It’s a process of interpreting, pausing, and reinterpreting.
-    </p><br>
-    <!-- Example placeholder for a labeled image -->
-    <div class="image-row">
-        <img src="assets/c1/c1.png" alt="Labeled Photograph Example 1" />
-        <img src="assets/c1/c1-map.png" alt="Labeled Photograph Example 1" />
-        <img src="assets/c1/c1-o12-Heavy_machinery_ocean_resort.jpg" alt="Labeled Photograph Example 2" />
-        <div class="overlay-text">Classification: “Heavy Machinery Ocean Resort Capitalism”</div>
-      </div> 
-      <div class="image-row">
-        <img src="assets/p11/p11.png" alt="Labeled Photograph Example 1" />
-        <img src="assets/p11/p11-map.png" alt="Labeled Photograph Example 1" />
-        <img src="assets/p11/p11-o9-ice_city.jpg" alt="Labeled Photograph Example 2" />
-        <div class="overlay-text">Classification: “Ice City Depression”</div>
-      </div>
-      <div class="image-row">
-        <img src="assets/c30/c30.png" alt="Labeled Photograph Example 1" />
-        <img src="assets/c30/c30-map.png" alt="Labeled Photograph Example 1" />
-        <img src="assets/c30/c30-o5-religous_city_corporate.jpg" alt="Labeled Photograph Example 2" />
-        <div class="overlay-text">Classification: “Religous City Corporation”</div>
-      </div>
-      <div class="image-row">
-        <img src="assets/p4/p4.png" alt="Labeled Photograph Example 1" />
-        <img src="assets/p4/p4-map.png" alt="Labeled Photograph Example 1" />
-        <img src="assets/p4/p4-o16-single_house.jpg" alt="Labeled Photograph Example 2" />
-        <div class="overlay-text">Classification: “Lonely Single House Post Oceans”</div>
-      </div>
-     </section>
-
-  <section><br>
-    <h2>AI Imagery Generation</h2>
-    <p>
-      With the labels, we created AI-generated satellite images with an open-source model called GeoSynth <sup>[3]</sup>, to replace each respective map tile and geographic region with the context and visions seen from each original photograph. GeoSynth is a suite of ControlNet adapters fine-tuned on Stable Diffusion, enabling the generation of high-resolution satellite images conditioned on OpenStreetMap map tiles. It offers us a great tool and thinking model to reverse construct satellite images based on fictional labels and terrain spatial layout references. Working with GeoSynth’s database also leads us to access preexisting categories of what “satellite images” have been about, such as “city,” “factory,” “military camp,” “farmland” (sample reference prompts from GeoSynth). We’re now able to reconstruct an uncannily realistic landscape, with slight touches of the imaginative and fantasized views, as if it is really seen from the satellite’s eyes.
-    </p>
-    <p>
-      One image from the variations of the satellite image was selected to generate an expanded video clip using Runway Gen-4. Each satellite video hovers and pans across the Earth.
-    </p>
-    <!-- Example placeholder for a GeoSynth-generated satellite image -->
-    <img src="assets/c18/Nested Sequence 01_2.gif" alt="GeoSynth Satellite Example" /> 
+    <figure class="image-wrapper">
+      <img
+        src="sat3.png"
+        alt="Satellite Image Exchange – Example Image"
+        class="image-inline"
+      />
+      <figcaption class="image-credit">
+        Credit: Xu Bing Studio
+      </figcaption>
+    </figure>
+    
   </section>
 
   <section>
-    <h2>Synthesized Landscape, Emotional Response</h2>
-    <p>
-      The decay and change we see in the real landscape are also mediations of planetary computation haunted by our desire, memory, fear, and power, generated in emotion and contemplation. Evolutions of both vertical image-surveilling and horizontal image-capturing are mediating into more complex satellite visions which we are all entangled in. In The Terminal Vision, we’re displaying our concern and calling for the climate, about the capitalistic extractions, evolving consequences of human conflicts, inevitably advancement of technological acceleration…
-    </p>
-    <!-- Example placeholder for a final montage or video still -->
-    <!-- <img src="path/to/your/final_montage.jpg" alt="Final Montage Shot" class="image-inline" /> -->
-  </section>
-
-<section>  <br><br>
+    <br />
     <h2>About the artists</h2>
     <p>
       A newly formed collective conducting practice-led research that works to reimagine planetary projections and map-making methods to examine colonial historic archives and contemporary technologies.
     </p>
     <p>
-        <strong><a href="https://ceciliahua.com/bio" target="_blank" rel="noopener">hua xi zi</a></strong> 
+      <strong><a href="https://ceciliahua.com/bio" target="_blank" rel="noopener">hua xi zi</a></strong>
     </p>
     <p>
-        <strong><a href="https://patrickoshea.art" target="_blank" rel="noopener">Patrick O’Shea</a></strong> 
+      <strong><a href="https://patrickoshea.art" target="_blank" rel="noopener">Patrick O’Shea</a></strong>
     </p>
-</section>
-<ul class="reference-list">
+  </section>
+
+  <ul class="reference-list">
     <li><strong>[1]</strong> The project title <em>The Terminal Vision</em> was inspired by J.G. Ballard’s novel, <em>The Terminal Beach</em>.</li>
-    <li><strong>[2]</strong> OpenStreetMap: <a href="https://www.openstreetmap.org" target="_blank" rel="noopener" style="color: var(--link-color);">https://www.openstreetmap.org</a></li>
-    <li><strong>[3]</strong> S. Sastry, S. Khanal, A. Dhakal, and N. Jacobs, “GeoSynth: Contextually-Aware High-Resolution Satellite Image Synthesis,” in <em>Proc. IEEE/ISPRS Workshop: Large Scale Computer Vision for Remote Sensing (EARTHVISION), 2024</em>.</li>
   </ul>
+
   <footer>
     <a href="registry.html">REGISTRY</a>
     <a href="./globe.html">MAP</a>
+    <a href="./methodology.html">METHODOLOGY</a>
     <a href="./version1/index_version1.html">UPDATES</a>
     <a href="./index.html">ABOUT</a>
   </footer>
-  <br><br><div>© hua xi zi & patrick o’shea</div>
-</body>
+  <br /><br />
+  <div style="text-align:center; margin-bottom: 40px; color: var(--subtext-color); font-size: 0.8rem;">
+    © hua xi zi & patrick o’shea
+  </div>
+</body><script>    (function() {
+  const el = document.getElementById('random-dashes');
+  const minDashes = 5;
+  const maxDashes = 80;
+
+  let currentLength = minDashes;
+  el.textContent = '-'.repeat(currentLength);
+
+  function pickNewTarget() {
+    // 1) Choose a random target length between min and max
+    const targetLength = Math.floor(Math.random() * (maxDashes - minDashes + 1)) + minDashes;
+    // 2) Choose a random total duration between 100ms and 1500ms
+    const totalDuration = Math.floor(Math.random() * (1500 - 100 + 1)) + 100;
+
+    // 3) Calculate how many steps (one dash at a time) we need
+    const diff = targetLength - currentLength;
+    const steps = Math.abs(diff);
+
+    if (steps === 0) {
+      // If already at target, wait a bit then pick again
+      const pause = Math.floor(Math.random() * (1500 - 100 + 1)) + 100;
+      setTimeout(pickNewTarget, pause);
+      return;
+    }
+
+    // 4) Compute interval between each step
+    const interval = totalDuration / steps;
+    const direction = diff > 0 ? 1 : -1;
+
+    let stepCount = 0;
+    const stepTimer = setInterval(() => {
+      currentLength += direction;
+      el.textContent = '-'.repeat(currentLength);
+      stepCount++;
+
+      if (stepCount >= steps) {
+        clearInterval(stepTimer);
+        // After reaching target, pick another target after a short random pause
+        const pause = Math.floor(Math.random() * (1500 - 100 + 1)) + 100;
+        setTimeout(pickNewTarget, pause);
+      }
+    }, interval);
+  }
+
+  // Start the first animation
+  pickNewTarget();
+})();</script>
 </html>
