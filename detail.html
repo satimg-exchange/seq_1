@@ -233,16 +233,16 @@
       line-height: 1.4;
       color: var(--text-color);
     }
-    .left-info .offset-location,
-    .left-info .offset-coords,
-    .left-info .offset-timestamp {
+    .left-info .location,
+    .left-info .coords,
+    .left-info .timestamp {
       font-size: 0.9rem;
       font-style: italic;
       color: var(--subtext-color);
       margin-top: 12px;
       margin-bottom: 12px;
     }
-    .left-info .offset-description {
+    .left-info .description {
       font-size: 1rem;
       color: var(--text-color);
       margin-top: 0;
@@ -557,38 +557,29 @@
       h2.textContent = metadata.title;
       leftInfo.appendChild(h2);
 
-      if (metadata.offsetBy) {
-        const offsetByP = document.createElement('p');
-        offsetByP.innerHTML = `<strong>Offset by:</strong><br>${metadata.offsetBy}`;
-        leftInfo.appendChild(offsetByP);
-      }
-      if (metadata.carbonOffset) {
-        const carbonOffsetP = document.createElement('p');
-        carbonOffsetP.innerHTML = `<strong>Carbon Offset:</strong><br>${metadata.carbonOffset}`;
-        leftInfo.appendChild(carbonOffsetP);
-      }
+
 
       const locationP = document.createElement('p');
-      locationP.className = 'offset-location';
+      locationP.className = 'location';
       locationP.textContent = `Location: ${metadata.location || 'Unknown'}`;
       leftInfo.appendChild(locationP);
 
       if (metadata.latitude != null && metadata.longitude != null) {
         const coordsP = document.createElement('p');
-        coordsP.className = 'offset-coords';
+        coordsP.className = 'coords';
         coordsP.innerHTML = `<strong>Coordinates:</strong> ${metadata.latitude.toFixed(6)}, ${metadata.longitude.toFixed(6)}`;
         leftInfo.appendChild(coordsP);
       }
 
       if (metadata.timestamp) {
         const tsP = document.createElement('p');
-        tsP.className = 'offset-timestamp';
+        tsP.className = 'timestamp';
         tsP.innerHTML = `<strong>Timestamp:</strong> ${metadata.timestamp}`;
         leftInfo.appendChild(tsP);
       }
 
       const descP = document.createElement('p');
-      descP.className = 'offset-description';
+      descP.className = 'description';
       descP.textContent = metadata.description;
       leftInfo.appendChild(descP);
 
@@ -598,12 +589,6 @@
       const rightInfo = document.createElement('div');
       rightInfo.className = 'right-info';
 
-      if (metadata.formula) {
-        const formulaP = document.createElement('p');
-        formulaP.className = 'formula';
-        formulaP.textContent = metadata.formula;
-        rightInfo.appendChild(formulaP);
-      }
 
       rightInfo.appendChild(document.createElement('hr'));
 
@@ -656,16 +641,11 @@
 
       let meta = metadataMap[folder] || {
         title: folder,
-        offset: "",
-        offsetBy: "",
-        carbonOffset: "",
-        vintage: "",
         location: "Unknown",
         latitude: null,
         longitude: null,
         timestamp: null,
         description: "No description available.",
-        formula: "",
         methodologyTitle: "",
         methodologyText: "",
         prompts: []

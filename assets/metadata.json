@@ -1,8 +1,7 @@
 {
   "c1": {
     "title": "",
-    "offset": "",
-    "vintage": 2025,
+    "year": 2025,
     "location": "Xi’an, China",
     "latitude": 34.2655,
     "longitude": 108.8955,
@@ -14,8 +13,7 @@
   },
   "c2": {
     "title": "",
-    "offset": "",
-    "vintage": 2024,
+    "year": 2024,
     "location": "Shanghai, China",
     "latitude": 31.3896,
     "longitude": 121.5225,
@@ -27,8 +25,7 @@
   },
   "c4": {
     "title": "",
-    "offset": "",
-    "vintage": 2024,
+    "year": 2024,
     "location": "Bangkok, Thailand",
     "latitude": 13.743853,
     "longitude": 100.589287,
@@ -42,8 +39,7 @@
   },
   "c10": {
     "title": "",
-    "offset": "",
-    "vintage": 2024,
+    "year": 2024,
     "location": "Baise, China",
     "latitude": 22.855908,
     "longitude": 106.724137,
@@ -61,8 +57,7 @@
   },
   "c12": {
     "title": "",
-    "offset": "",
-    "vintage": 2024,
+    "year": 2024,
     "location": "Shanghai, China",
     "latitude": 31.272038,
     "longitude": 121.555763,
@@ -77,8 +72,7 @@
   },
   "c14": {
     "title": "",
-    "offset": "",
-    "vintage": 2024,
+    "year": 2024,
     "location": "Shanghai, China",
     "latitude": 31.192763,
     "longitude": 121.299422,
@@ -105,8 +99,7 @@
   },
   "c17": {
     "title": "",
-    "offset": "",
-    "vintage": 2024,
+    "year": 2024,
     "location": "Xuzhou, China",
     "latitude": 34.302837,
     "longitude": 117.290383,
@@ -123,8 +116,7 @@
   },
   "c18": {
     "title": "",
-    "offset": "",
-    "vintage": 2024,
+    "year": 2024,
     "location": "Xi’an, China",
     "latitude": 34.232463,
     "longitude": 109.122156,
@@ -140,8 +132,7 @@
   },
   "c19": {
     "title": "",
-    "offset": "",
-    "vintage": 2024,
+    "year": 2024,
     "location": "Hong Kong, China",
     "latitude": 22.282508,
     "longitude": 114.191162,
@@ -157,8 +148,7 @@
   },
   "c24": {
     "title": "",
-    "offset": "",
-    "vintage": 2024,
+    "year": 2024,
     "location": "Chiang Mai, Thailand",
     "latitude": 18.799705,
     "longitude": 98.939112,
@@ -171,8 +161,7 @@
   },
   "c27": {
     "title": "",
-    "offset": "",
-    "vintage": 2024,
+    "year": 2024,
     "location": "Chiang Rai, Thailand",
     "latitude": 20.350608,
     "longitude": 100.082856,
@@ -186,8 +175,7 @@
   },
   "c28": {
     "title": "",
-    "offset": "",
-    "vintage": 2024,
+    "year": 2024,
     "location": "Chiang Rai, Thailand",
     "latitude": 19.912762,
     "longitude": 99.824487,
@@ -203,8 +191,7 @@
   },
   "c30": {
     "title": "",
-    "offset": "",
-    "vintage": 2024,
+    "year": 2024,
     "location": "Chiang Mai, Thailand",
     "latitude": 18.796292,
     "longitude": 98.982978,
@@ -213,8 +200,7 @@
   },
   "p2": {
     "title": "",
-    "offset": "",
-    "vintage": 2024,
+    "year": 2024,
     "location": "Swanton, USA",
     "latitude": 44.91871399,
     "longitude": -73.12477538,
@@ -229,8 +215,7 @@
   },
   "p4": {
     "title": "",
-    "offset": "",
-    "vintage": 2024,
+    "year": 2024,
     "location": "Franklin, USA",
     "latitude": 44.97115405,
     "longitude": -72.89641591,
@@ -248,8 +233,7 @@
   },
   "p7": {
     "title": "",
-    "offset": "",
-    "vintage": 2024,
+    "year": 2024,
     "location": "Bangkok, Thailand",
     "latitude": 13.75,
     "longitude": 100.49,
@@ -278,8 +262,7 @@
   },
   "p8": {
     "title": "",
-    "offset": "",
-    "vintage": 2024,
+    "year": 2024,
     "location": "Quebec City, Canada",
     "latitude": 46.813,
     "longitude": -71.2,
@@ -296,8 +279,7 @@
   },
   "p10": {
     "title": "",
-    "offset": "",
-    "vintage": 2024,
+    "year": 2024,
     "location": "Vancouver, Canada",
     "latitude": 49.28,
     "longitude": -123.105,
@@ -315,8 +297,7 @@
   },
   "p11": {
     "title": "",
-    "offset": "",
-    "vintage": 2025,
+    "year": 2025,
     "location": "Montreal, Canada",
     "latitude": 45.54,
     "longitude": -73.58,
@@ -328,19 +309,5 @@
       "snowy streets, dream",
       "satellite image of snowy city of Montreal"
     ]
-  },
-  "sca-1": {
-    "title": "Experimental Offset SCA-1",
-    "offset": "SCA-1",
-    "vintage": 2025,
-    "location": "Experimental Zone",
-    "latitude": null,
-    "longitude": null,
-    "timestamp": null,
-    "description": "This offset is styled specially to demonstrate the experimental and distinct look for the 'SCA-1' offset. It includes a dashed border and skew transform.",
-    "formula": "",
-    "methodologyTitle": "",
-    "methodologyText": "",
-    "prompts": []
   }
 }
